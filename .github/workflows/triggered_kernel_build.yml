@@ -54,7 +54,7 @@ jobs:
                 curl -LSs "https://raw.githubusercontent.com/rifsxd/KernelSU-Next/next-susfs/kernel/setup.sh" | bash -s next-susfs
                 rm android/abi_gki_protected_exports_*
                 cd ~
-                BUILD_TYPE=gki ./kernel/buildscript bluejay
+                BUILD_TYPE=gki-ksunext ./kernel/buildscript bluejay
             
             - name: build gki with ksu and susfs
               run: |
@@ -71,7 +71,7 @@ jobs:
                 cd ..
                 patch -p1 < 50_add_susfs_in_gki-android14-6.1.patch
                 cd ~
-                BUILD_TYPE=gki ./kernel/buildscript bluejay
+                BUILD_TYPE=gki-ksunext-susfs ./kernel/buildscript bluejay
             
     cheetah:
         runs-on: ubuntu-22.04
@@ -111,7 +111,7 @@ jobs:
                 curl -LSs "https://raw.githubusercontent.com/rifsxd/KernelSU-Next/next-susfs/kernel/setup.sh" | bash -s next-susfs
                 rm android/abi_gki_protected_exports_*
                 cd ~
-                BUILD_TYPE=gki ./kernel/buildscript bluejay
+                BUILD_TYPE=gki-ksunext ./kernel/buildscript bluejay
             
             - name: build gki with ksu and susfs
               run: |
@@ -128,4 +128,4 @@ jobs:
                 cd ..
                 patch -p1 < 50_add_susfs_in_gki-android14-6.1.patch
                 cd ~
-                BUILD_TYPE=gki ./kernel/buildscript bluejay 
+                BUILD_TYPE=gki-ksunext-susfs ./kernel/buildscript bluejay 
