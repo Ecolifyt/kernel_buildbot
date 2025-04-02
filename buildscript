@@ -47,7 +47,7 @@ done
 if [ ! -d "$dst/.git" ]; then
 	git -C "$dst" init
 	git -C "$dst" remote add origin https://github.com/tvyiutnhisokewt/kernel_buildbot.git
-done
+fi
 git -C "$dst" add -A
 git -C "$dst" commit "upload prebuilt ${BUILD_TYPE} kernel" --signoff
 git -C "$dst" push origin ${tg}-${KERNEL_VERSION}-${BUILD_TYPE} -f
