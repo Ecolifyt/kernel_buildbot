@@ -18,7 +18,7 @@ fi
 
 # build kernel
 cd kernel
-BUILD_KERNEL=1 ./build_$tg.sh --config=no_download_gki_fips140 --config=no_download_gki --kernel_package=@//aosp "${@:2}"
+BUILD_KERNEL=1 ./build_$tg.sh --config=no_download_gki_fips140 --config=no_download_gki --kernel_package=@//aosp --lto=thin "${@:2}"
 cd .. # god damn it gh
 
 dst=~/release_${orig}_kernel_evolution
@@ -44,7 +44,7 @@ for files in "*.tar.gz" "dtb.img" "*.dtbo" "Image" "Image.gz" "kernel_aarch64_mo
 done
 
 # push
-if [ ! -d "$dst/.git" ]; do
+if [ ! -d "$dst/.git" ]; then
 	git -C "$dst" init
 	git -C "$dst" remote add origin https://github.com/tvyiutnhisokewt/kernel_buildbot.git
 done

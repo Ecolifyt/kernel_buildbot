@@ -32,10 +32,10 @@ jobs:
             
             - name: bluejay 90hz patch
               run: |
-                cp bluejay_90hz.patch ~
                 cd ~
-                cp bluejay_90hz.patch kernel/private/devices/google/bluejay
-                git -C "kernel/private/devices/google/bluejay" apply bluejay_90hz.patch
+                rm -rf kernel/private/devices/google/bluejay/*
+                git clone https://github.com/tvyiutnhisokewt/private_devices_google_bluejay
+                cp -r private_devices_google_bluejay/* kernel/private/devices/google/bluejay/
 
             
             - name: build gki
