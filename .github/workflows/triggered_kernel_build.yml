@@ -26,16 +26,15 @@ jobs:
             - name: checkout aosp kernel build system
               run: |
                 mkdir kernel
+                cp buildscript kernel
                 cd kernel
                 repo init -u https://android.googlesource.com/kernel/manifest.git -b android-gs-bluejay-6.1-android15-qpr2-beta --depth 1
                 repo sync -c -j$(nproc --all) --no-tags --no-clone-bundle --force-sync
-                cp ~/buildscript .
             
             - name: bluejay 90hz patch
               run: |
-                cd kernel/private/devices/google/bluejay
-                cp ~/bluejay_90hz.patch .
-                git apply bluejay_90hz.patch
+                cd bluejay_90hz.patch kernel/private/devices/google/bluejay
+                git -C "kernel/private/devices/google/bluejay" apply bluejay_90hz.patch
 
             
             - name: build gki
@@ -47,8 +46,8 @@ jobs:
                 cd kernel/aosp
                 curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
                 rm android/abi_gki_protected_exports_*
-                cd
-                BUILD_TYPE=gki-ksu ./kernel/buildscript bluejay
+                cd ..
+                BUILD_TYPE=gki-ksu ./buildscript bluejay
             
             - name: build gki with ksu and susfs
               run: |
@@ -63,8 +62,7 @@ jobs:
                 patch -p1 < 10_enable_susfs_for_ksu.patch
                 cd ..
                 patch -p1 < 50_add_susfs_in_gki-android14-6.1.patch
-                cd ~
-                BUILD_TYPE=gki-ksu-susfs ./kernel/buildscript bluejay
+                BUILD_TYPE=gki-ksu-susfs ./buildscript bluejay
             
     cheetah:
         runs-on: ubuntu-22.04
@@ -84,10 +82,10 @@ jobs:
             - name: checkout aosp kernel build system
               run: |
                 mkdir kernel
+                cp buildscript kernel
                 cd kernel
                 repo init -u https://android.googlesource.com/kernel/manifest.git -b android-gs-pantah-6.1-android15-qpr2-beta --depth 1
                 repo sync -c -j$(nproc --all) --no-tags --no-clone-bundle --force-sync
-                cp ~/buildscript .
             
             - name: build gki
               run: |
@@ -98,8 +96,8 @@ jobs:
                 cd kernel/aosp
                 curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
                 rm android/abi_gki_protected_exports_*
-                cd
-                BUILD_TYPE=gki-ksu ./kernel/buildscript cheetah
+                cd ..
+                BUILD_TYPE=gki-ksu ./buildscript cheetah
             
             - name: build gki with ksu and susfs
               run: |
@@ -114,5 +112,4 @@ jobs:
                 patch -p1 < 10_enable_susfs_for_ksu.patch
                 cd ..
                 patch -p1 < 50_add_susfs_in_gki-android14-6.1.patch
-                cd ~
-                BUILD_TYPE=gki-ksu-susfs ./kernel/buildscript cheetah    
+                BUILD_TYPE=gki-ksu-susfs ./buildscript cheetah    
