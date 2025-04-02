@@ -17,7 +17,9 @@ if [[ $tg == "cheetah" || $tg == "panther" ]]; then
 fi
 
 # build kernel
-BUILD_KERNEL=1 ./kernel/build_$tg.sh --config=no_download_gki_fips140 --config=no_download_gki --kernel_package=@//aosp "${@:2}"
+cd kernel
+BUILD_KERNEL=1 ./build_$tg.sh --config=no_download_gki_fips140 --config=no_download_gki --kernel_package=@//aosp "${@:2}"
+cd .. # god damn it gh
 
 dst=~/release_${orig}_kernel_evolution
 mkdir -p $dst
