@@ -51,7 +51,7 @@ jobs:
                 BUILD_TYPE=gki-ksu ./kernel/buildscript bluejay
             
             - name: build gki with ksu and susfs
-            - run: |
+              run: |
                 cd kernel
                 git clone https://gitlab.com/simonpunk/susfs4ksu.git -b gki-android14-6.1
                 cd susfs4ksu
@@ -102,7 +102,7 @@ jobs:
                 BUILD_TYPE=gki-ksu ./kernel/buildscript cheetah
             
             - name: build gki with ksu and susfs
-            - run: |
+              run: |
                 cd kernel
                 git clone https://gitlab.com/simonpunk/susfs4ksu.git -b gki-android14-6.1
                 cd susfs4ksu
