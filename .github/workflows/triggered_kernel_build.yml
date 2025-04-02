@@ -36,6 +36,7 @@ jobs:
             
             - name: bluejay 90hz patch
               run: |
+                cp bluejay_90hz.patch ~
                 cd ~
                 cp bluejay_90hz.patch kernel/private/devices/google/bluejay
                 git -C "kernel/private/devices/google/bluejay" apply bluejay_90hz.patch
