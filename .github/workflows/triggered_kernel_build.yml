@@ -19,12 +19,15 @@ jobs:
                 ./pkginstall
 
             - name: init credentials
-              run: |         
+              run: |   
+                cd ~      
                 git config --global user.name "[kernel buildbot] vy"
                 git config --global user.email "vy@buildbot.tvyiutnhisokewt"
             
             - name: checkout aosp kernel build system
               run: |
+                cp buildscript ~ 
+                cd ~
                 mkdir kernel
                 cp buildscript kernel
                 cd kernel
@@ -33,16 +36,19 @@ jobs:
             
             - name: bluejay 90hz patch
               run: |
+                cd ~
                 cd bluejay_90hz.patch kernel/private/devices/google/bluejay
                 git -C "kernel/private/devices/google/bluejay" apply bluejay_90hz.patch
 
             
             - name: build gki
               run: |
+                cd ~
                 BUILD_TYPE=gki ./kernel/buildscript bluejay
             
             - name: build gki with ksu
               run: |
+                cd ~
                 cd kernel/aosp
                 curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
                 rm android/abi_gki_protected_exports_*
@@ -51,6 +57,7 @@ jobs:
             
             - name: build gki with ksu and susfs
               run: |
+                cd ~
                 cd kernel
                 git clone https://gitlab.com/simonpunk/susfs4ksu.git -b gki-android14-6.1
                 cd susfs4ksu
@@ -75,12 +82,15 @@ jobs:
                 ./pkginstall
 
             - name: init credentials
-              run: |         
+              run: |     
+                cd ~    
                 git config --global user.name "[kernel buildbot] nhi"
                 git config --global user.email "nhi@buildbot.tvyiutnhisokewt"
             
             - name: checkout aosp kernel build system
               run: |
+                cp buildscript ~ 
+                cd ~
                 mkdir kernel
                 cp buildscript kernel
                 cd kernel
@@ -89,10 +99,12 @@ jobs:
             
             - name: build gki
               run: |
+                cd ~
                 BUILD_TYPE=gki ./kernel/buildscript cheetah
             
             - name: build gki with ksu
               run: |
+                cd ~
                 cd kernel/aosp
                 curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
                 rm android/abi_gki_protected_exports_*
@@ -101,6 +113,7 @@ jobs:
             
             - name: build gki with ksu and susfs
               run: |
+                cd ~
                 cd kernel
                 git clone https://gitlab.com/simonpunk/susfs4ksu.git -b gki-android14-6.1
                 cd susfs4ksu
