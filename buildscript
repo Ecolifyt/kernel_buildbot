@@ -1,0 +1,44 @@
+#!/bin/bash
+
+KERNEL_VERSION="6.1"
+QPR_REL="25Q1-12919773"
+
+if { [[ $1 == "" ]] || [[ $1 != "cheetah" && $1 != "panther" && $1 != "pantah" && $1 != "bluejay" ]]; }; then
+	echo "Fuck!"
+	exit 2
+fi
+
+orig=$1
+tg=$1
+
+# rename target to common target
+if [[ $tg == "cheetah" || $tg == "panther" ]]; then
+	tg="pantah"
+fi
+
+# build kernel
+BUILD_KERNEL=1 ./build_$tg.sh --config=no_download_gki_fips140 --config=no_download_gki --kernel_package=@//aosp "${@:2}"
+
+dst=$HOME/release_${orig}_kernel_evolution
+mkdir -p $dst
+if [ -d $dst ]; then
+	rm -rf $dst/*
+fi
+
+# copy out and make not executable
+cp -rf out/$tg/dist/* $dst/
+chmod -x $dst/*
+
+# deflate kernel headers
+tar zxvf $dst/kernel-headers.tar.gz -C $dst
+# , and copy original kernel headers
+LINK="https://android.googlesource.com/device/google/${tg}-kernels/${KERNEL_VERSION}/+archive/refs/heads/main/${QPR_REL}/original-kernel-headers.tar.gz"
+wget ${LINK} -O /tmp/original-kernel-headers.tar.gz
+tar zxvf /tmp/original-kernel-headers.tar.gz -C $dst/kernel-headers
+
+# cleanup
+for files in "*.tar.gz" "dtb.img" "*.dtbo" "Image" "Image.gz" "kernel_aarch64_modules" "kernel_kmi_symbol_list_violations_checked" "kernel_modules" "system_dlkm.img" "vendor_dlkm.img" "vendor_kernel_boot.img" "vmlinux*"; do
+	rm $dst/$files
+done
+
+exit 0
