@@ -21,7 +21,7 @@ cd kernel
 BUILD_KERNEL=1 ./build_$tg.sh --config=no_download_gki_fips140 --config=no_download_gki --kernel_package=@//aosp --lto=thin "${@:2}"
 cd .. # god damn it gh
 
-dst=~/release_${orig}_kernel_evolution
+dst=~/${tg}-${KERNEL_VERSION}-${BUILD_TYPE}
 mkdir -p $dst
 if [ -d $dst ]; then
 	rm -rf $dst/*
@@ -42,15 +42,5 @@ tar zxvf /tmp/original-kernel-headers.tar.gz -C $dst/kernel-headers
 for files in "*.tar.gz" "dtb.img" "*.dtbo" "Image" "Image.gz" "kernel_aarch64_modules" "kernel_kmi_symbol_list_violations_checked" "kernel_modules" "system_dlkm.img" "vendor_dlkm.img" "vendor_kernel_boot.img" "vmlinux*"; do
 	rm $dst/$files
 done
-
-# push
-if [ ! -d "$dst/.git" ]; then
-	git -C "$dst" init
-	git -C "$dst" remote add origin https://github.com/tvyiutnhisokewt/kernel_buildbot.git
-fi
-git -C "$dst" branch -m ${tg}-${KERNEL_VERSION}-${BUILD_TYPE}
-git -C "$dst" add -A
-git -C "$dst" commit -m "upload prebuilt ${BUILD_TYPE} kernel" --signoff
-git -C "$dst" push origin ${tg}-${KERNEL_VERSION}-${BUILD_TYPE} -f
 
 exit 0
