@@ -8,7 +8,51 @@ on:
             - sauce
     workflow_dispatch:
 jobs:
-    bluejay:
+    bluejay_gki:
+        runs-on: ubuntu-22.04
+        steps:
+            - name: checkout scripts
+              uses: actions/checkout@v4
+            
+            - name: install packages
+              run: |
+                ./pkginstall
+
+            - name: init credentials
+              run: |   
+                cd ~      
+                git config --global user.name "[kernel buildbot] vy"
+                git config --global user.email "vy@buildbot.tvyiutnhisokewt"
+            
+            - name: checkout aosp kernel build system
+              run: |
+                cp buildscript ~ 
+                cd ~
+                mkdir kernel
+                cp buildscript kernel
+                cd kernel
+                repo init -u https://android.googlesource.com/kernel/manifest.git -b android-gs-bluejay-6.1-android15-qpr2-beta --depth 1
+                repo sync -c -j$(nproc --all) --no-tags --no-clone-bundle --force-sync
+            
+            - name: bluejay 90hz patch
+              run: |
+                cd ~
+                rm -rf kernel/private/devices/google/bluejay/*
+                git clone https://github.com/tvyiutnhisokewt/private_devices_google_bluejay
+                cp -r private_devices_google_bluejay/* kernel/private/devices/google/bluejay/
+  
+            - name: build gki
+              run: |
+                cd ~
+                BUILD_TYPE=gki ./kernel/buildscript bluejay
+
+            - name: upload build artifacts
+              uses: actions/upload-artifact@v4
+              with:
+                 name: bluejay_gki
+                 path: |
+                    ~/bluejay_gki
+    bluejay_gki-ksunext:
         runs-on: ubuntu-22.04
         steps:
             - name: checkout scripts
@@ -41,24 +85,11 @@ jobs:
                 git clone https://github.com/tvyiutnhisokewt/private_devices_google_bluejay
                 cp -r private_devices_google_bluejay/* kernel/private/devices/google/bluejay/
 
-            
-            - name: build gki
-              run: |
-                cd ~
-                BUILD_TYPE=gki ./kernel/buildscript bluejay
-
-            - name: upload build artifacts
-              uses: actions/upload-artifact@v4
-              with:
-                 name: bluejay-gki
-                 path: |
-                    ~/release_bluejay_kernel_evolution
-            
-            - name: build gki with ksu
+            - name: build gki with kernelsu-next
               run: |
                 cd ~
                 cd kernel/aosp
-                curl -LSs "https://raw.githubusercontent.com/rifsxd/KernelSU-Next/next-susfs/kernel/setup.sh" | bash -s next-susfs
+                curl -LSs "https://raw.githubusercontent.com/rifsxd/KernelSU-Next/next/kernel/setup.sh" | bash -
                 rm android/abi_gki_protected_exports_*
                 cd ~
                 BUILD_TYPE=gki-ksunext ./kernel/buildscript bluejay
@@ -66,14 +97,47 @@ jobs:
             - name: upload build artifacts
               uses: actions/upload-artifact@v4
               with:
-                 name: bluejay-gki-ksunext
+                 name: bluejay_gki-ksunext
                  path: |
-                    ~/release_bluejay_kernel_evolution
+                    ~/bluejay_gki-ksunext
+    bluejay_gki-ksunext-susfs:
+        runs-on: ubuntu-22.04
+        steps:
+            - name: checkout scripts
+              uses: actions/checkout@v4
             
-            - name: build gki with ksu and susfs
+            - name: install packages
+              run: |
+                ./pkginstall
+
+            - name: init credentials
+              run: |   
+                cd ~      
+                git config --global user.name "[kernel buildbot] vy"
+                git config --global user.email "vy@buildbot.tvyiutnhisokewt"
+            
+            - name: checkout aosp kernel build system
+              run: |
+                cp buildscript ~ 
+                cd ~
+                mkdir kernel
+                cp buildscript kernel
+                cd kernel
+                repo init -u https://android.googlesource.com/kernel/manifest.git -b android-gs-bluejay-6.1-android15-qpr2-beta --depth 1
+                repo sync -c -j$(nproc --all) --no-tags --no-clone-bundle --force-sync
+            
+            - name: bluejay 90hz patch
+              run: |
+                cd ~
+                rm -rf kernel/private/devices/google/bluejay/*
+                git clone https://github.com/tvyiutnhisokewt/private_devices_google_bluejay
+                cp -r private_devices_google_bluejay/* kernel/private/devices/google/bluejay/
+
+            - name: build gki with kernelsu-next
               run: |
                 cd ~
                 cd kernel
+                curl -LSs "https://raw.githubusercontent.com/rifsxd/KernelSU-Next/next-susfs/kernel/setup.sh" | bash -s next-susfs
                 git clone https://gitlab.com/simonpunk/susfs4ksu.git -b gki-android14-6.1
                 cd susfs4ksu
                 cp ./kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch ../aosp/KernelSU
@@ -86,16 +150,14 @@ jobs:
                 patch -p1 < 50_add_susfs_in_gki-android14-6.1.patch
                 cd ~
                 BUILD_TYPE=gki-ksunext-susfs ./kernel/buildscript bluejay
-                
+
             - name: upload build artifacts
               uses: actions/upload-artifact@v4
               with:
-                 name: bluejay-gki-ksunext-susfs
+                 name: bluejay_gki-ksunext
                  path: |
-                    ~/release_bluejay_kernel_evolution
-                 
-            
-    cheetah:
+                    ~/bluejay_gki-ksunext-susfs
+    pantah_gki:
         runs-on: ubuntu-22.04
         steps:
             - name: checkout scripts
@@ -106,8 +168,8 @@ jobs:
                 ./pkginstall
 
             - name: init credentials
-              run: |     
-                cd ~    
+              run: |   
+                cd ~      
                 git config --global user.name "[kernel buildbot] nhi"
                 git config --global user.email "nhi@buildbot.tvyiutnhisokewt"
             
@@ -120,39 +182,90 @@ jobs:
                 cd kernel
                 repo init -u https://android.googlesource.com/kernel/manifest.git -b android-gs-pantah-6.1-android15-qpr2-beta --depth 1
                 repo sync -c -j$(nproc --all) --no-tags --no-clone-bundle --force-sync
-            
+  
             - name: build gki
               run: |
                 cd ~
-                BUILD_TYPE=gki ./kernel/buildscript cheetah
+                BUILD_TYPE=gki ./kernel/buildscript pantah
 
             - name: upload build artifacts
               uses: actions/upload-artifact@v4
               with:
-                 name: cheetah-gki
+                 name: pantah_gki
                  path: |
-                    ~/release_cheetah_kernel_evolution
+                    ~/pantah_gki
+    pantah_gki-ksunext:
+        runs-on: ubuntu-22.04
+        steps:
+            - name: checkout scripts
+              uses: actions/checkout@v4
             
-            - name: build gki with ksu
+            - name: install packages
+              run: |
+                ./pkginstall
+
+            - name: init credentials
+              run: |   
+                cd ~      
+                git config --global user.name "[kernel buildbot] nhi"
+                git config --global user.email "nhi@buildbot.tvyiutnhisokewt"
+            
+            - name: checkout aosp kernel build system
+              run: |
+                cp buildscript ~ 
+                cd ~
+                mkdir kernel
+                cp buildscript kernel
+                cd kernel
+                repo init -u https://android.googlesource.com/kernel/manifest.git -b android-gs-pantah-6.1-android15-qpr2-beta --depth 1
+                repo sync -c -j$(nproc --all) --no-tags --no-clone-bundle --force-sync
+
+            - name: build gki with kernelsu-next
               run: |
                 cd ~
                 cd kernel/aosp
-                curl -LSs "https://raw.githubusercontent.com/rifsxd/KernelSU-Next/next-susfs/kernel/setup.sh" | bash -s next-susfs
+                curl -LSs "https://raw.githubusercontent.com/rifsxd/KernelSU-Next/next/kernel/setup.sh" | bash -
                 rm android/abi_gki_protected_exports_*
                 cd ~
-                BUILD_TYPE=gki-ksunext ./kernel/buildscript cheetah
+                BUILD_TYPE=gki-ksunext ./kernel/buildscript pantah
 
             - name: upload build artifacts
               uses: actions/upload-artifact@v4
               with:
-                 name: cheetah-gki-ksunext
+                 name: pantah_gki-ksunext
                  path: |
-                    ~/release_cheetah_kernel_evolution
+                    ~/pantah_gki-ksunext
+    pantah_gki-ksunext-susfs:
+        runs-on: ubuntu-22.04
+        steps:
+            - name: checkout scripts
+              uses: actions/checkout@v4
             
-            - name: build gki with ksu and susfs
+            - name: install packages
+              run: |
+                ./pkginstall
+
+            - name: init credentials
+              run: |   
+                cd ~      
+                git config --global user.name "[kernel buildbot] nhi"
+                git config --global user.email "nhi@buildbot.tvyiutnhisokewt"
+            
+            - name: checkout aosp kernel build system
+              run: |
+                cp buildscript ~ 
+                cd ~
+                mkdir kernel
+                cp buildscript kernel
+                cd kernel
+                repo init -u https://android.googlesource.com/kernel/manifest.git -b android-gs-pantah-6.1-android15-qpr2-beta --depth 1
+                repo sync -c -j$(nproc --all) --no-tags --no-clone-bundle --force-sync
+
+            - name: build gki with kernelsu-next
               run: |
                 cd ~
                 cd kernel
+                curl -LSs "https://raw.githubusercontent.com/rifsxd/KernelSU-Next/next-susfs/kernel/setup.sh" | bash -s next-susfs
                 git clone https://gitlab.com/simonpunk/susfs4ksu.git -b gki-android14-6.1
                 cd susfs4ksu
                 cp ./kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch ../aosp/KernelSU
@@ -164,11 +277,11 @@ jobs:
                 cd ..
                 patch -p1 < 50_add_susfs_in_gki-android14-6.1.patch
                 cd ~
-                BUILD_TYPE=gki-ksunext-susfs ./kernel/buildscript cheetah
+                BUILD_TYPE=gki-ksunext-susfs ./kernel/buildscript pantah
 
             - name: upload build artifacts
               uses: actions/upload-artifact@v4
               with:
-                 name: cheetah-gki-ksunext-susfs
+                 name: pantah_gki-ksunext
                  path: |
-                    ~/release_cheetah_kernel_evolution
+                    ~/pantah_gki-ksunext-susfs
