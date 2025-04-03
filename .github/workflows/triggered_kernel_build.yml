@@ -51,7 +51,7 @@ jobs:
               with:
                  name: bluejay_gki
                  path: |
-                    ~/bluejay_gki
+                    ~/kernel/out/bluejay/dist
     bluejay_gki-ksunext:
         runs-on: ubuntu-22.04
         steps:
@@ -99,71 +99,8 @@ jobs:
               with:
                  name: bluejay_gki-ksunext
                  path: |
-                    ~/bluejay_gki-ksunext
-    bluejay_gki-ksunext-susfs:
-        runs-on: ubuntu-22.04
-        steps:
-            - name: checkout scripts
-              uses: actions/checkout@v4
-            
-            - name: install packages
-              run: |
-                ./pkginstall
-
-            - name: init credentials
-              run: |   
-                cd ~      
-                git config --global user.name "[kernel buildbot] vy"
-                git config --global user.email "vy@buildbot.tvyiutnhisokewt"
-            
-            - name: checkout aosp kernel build system
-              run: |
-                cp buildscript ~ 
-                cd ~
-                mkdir kernel
-                cp buildscript kernel
-                cd kernel
-                repo init -u https://android.googlesource.com/kernel/manifest.git -b android-gs-bluejay-6.1-android15-qpr2-beta --depth 1
-                repo sync -c -j$(nproc --all) --no-tags --no-clone-bundle --force-sync
-            
-            - name: bluejay 90hz patch
-              run: |
-                cd ~
-                rm -rf kernel/private/devices/google/bluejay/*
-                git clone https://github.com/tvyiutnhisokewt/private_devices_google_bluejay
-                cp -r private_devices_google_bluejay/* kernel/private/devices/google/bluejay/
-
-            - name: patch susfs
-              continue-on-error: true
-              run: |
-                cd ~
-                NDK_PATH="$(pwd)/kernel/prebuilts/ndk-r23/"
-                cd kernel/aosp
-                curl -LSs "https://raw.githubusercontent.com/rifsxd/KernelSU-Next/next-susfs/kernel/setup.sh" | bash -s next-susfs
-                git clone https://gitlab.com/simonpunk/susfs4ksu.git -b gki-android14-6.1
-                cd susfs4ksu
-                PATH="${PATH}:${NDK_PATH}" ./build_ksu_susfs_tool.sh
-                cp ./kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch ../KernelSU-Next
-                cp ./kernel_patches/50_add_susfs_in_gki-android14-6.1.patch ../
-                cp ./kernel_patches/fs/* ../fs/
-                cp ./kernel_patches/include/linux/* ../include/linux/
-                cd ../KernelSU-Next
-                patch -p1 < 10_enable_susfs_for_ksu.patch
-                cd ..
-                patch -p1 < 50_add_susfs_in_gki-android14-6.1.patch
-
-            - name: build gki with kernelsu-next with susfs
-              if: always()
-              run: |
-                cd ~
-                BUILD_TYPE=gki-ksunext-susfs ./kernel/buildscript bluejay
-
-            - name: upload build artifacts
-              uses: actions/upload-artifact@v4
-              with:
-                 name: bluejay_gki-ksunext
-                 path: |
-                    ~/bluejay_gki-ksunext-susfs
+                    ~/kernel/out/bluejay/dist
+    
     pantah_gki:
         runs-on: ubuntu-22.04
         steps:
@@ -200,7 +137,7 @@ jobs:
               with:
                  name: pantah_gki
                  path: |
-                    ~/pantah_gki
+                    ~/kernel/out/bluejay/dist
     pantah_gki-ksunext:
         runs-on: ubuntu-22.04
         steps:
@@ -241,61 +178,5 @@ jobs:
               with:
                  name: pantah_gki-ksunext
                  path: |
-                    ~/pantah_gki-ksunext
-    pantah_gki-ksunext-susfs:
-        runs-on: ubuntu-22.04
-        steps:
-            - name: checkout scripts
-              uses: actions/checkout@v4
-            
-            - name: install packages
-              run: |
-                ./pkginstall
-
-            - name: init credentials
-              run: |   
-                cd ~      
-                git config --global user.name "[kernel buildbot] nhi"
-                git config --global user.email "nhi@buildbot.tvyiutnhisokewt"
-            
-            - name: checkout aosp kernel build system
-              run: |
-                cp buildscript ~ 
-                cd ~
-                mkdir kernel
-                cp buildscript kernel
-                cd kernel
-                repo init -u https://android.googlesource.com/kernel/manifest.git -b android-gs-pantah-6.1-android15-qpr2-beta --depth 1
-                repo sync -c -j$(nproc --all) --no-tags --no-clone-bundle --force-sync
-
-            - name: patch susfs
-              continue-on-error: true
-              run: |
-                cd ~
-                NDK_PATH="$(pwd)/kernel/prebuilts/ndk-r23/"
-                cd kernel/aosp
-                curl -LSs "https://raw.githubusercontent.com/rifsxd/KernelSU-Next/next-susfs/kernel/setup.sh" | bash -s next-susfs
-                git clone https://gitlab.com/simonpunk/susfs4ksu.git -b gki-android14-6.1
-                cd susfs4ksu
-                PATH="${PATH}:${NDK_PATH}" ./build_ksu_susfs_tool.sh
-                cp ./kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch ../KernelSU-Next
-                cp ./kernel_patches/50_add_susfs_in_gki-android14-6.1.patch ../
-                cp ./kernel_patches/fs/* ../fs/
-                cp ./kernel_patches/include/linux/* ../include/linux/
-                cd ../KernelSU-Next
-                patch -p1 < 10_enable_susfs_for_ksu.patch
-                cd ..
-                patch -p1 < 50_add_susfs_in_gki-android14-6.1.patch
-
-            - name: build gki with kernelsu-next with susfs
-              if: always()
-              run: |
-                cd ~
-                BUILD_TYPE=gki-ksunext-susfs ./kernel/buildscript pantah
-
-            - name: upload build artifacts
-              uses: actions/upload-artifact@v4
-              with:
-                 name: pantah_gki-ksunext
-                 path: |
-                    ~/pantah_gki-ksunext-susfs
+                    ~/kernel/out/bluejay/dist
+    
