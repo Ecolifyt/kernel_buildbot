@@ -140,11 +140,11 @@ jobs:
                 curl -LSs "https://raw.githubusercontent.com/rifsxd/KernelSU-Next/next-susfs/kernel/setup.sh" | bash -s next-susfs
                 git clone https://gitlab.com/simonpunk/susfs4ksu.git -b gki-android14-6.1
                 cd susfs4ksu
-                cp ./kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch ../aosp/KernelSU
-                cp ./kernel_patches/50_add_susfs_in_gki-android14-6.1.patch ../aosp/
-                cp ./kernel_patches/fs/* ../aosp/fs/
-                cp ./kernel_patches/include/linux/* ../aosp/include/linux/
-                cd ../aosp/KernelSU
+                cp ./kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch ../KernelSU-Next
+                cp ./kernel_patches/50_add_susfs_in_gki-android14-6.1.patch ../
+                cp ./kernel_patches/fs/* ../fs/
+                cp ./kernel_patches/include/linux/* ../include/linux/
+                cd ../KernelSU-Next
                 patch -p1 < 10_enable_susfs_for_ksu.patch
                 cd ..
                 patch -p1 < 50_add_susfs_in_gki-android14-6.1.patch
@@ -268,11 +268,11 @@ jobs:
                 curl -LSs "https://raw.githubusercontent.com/rifsxd/KernelSU-Next/next-susfs/kernel/setup.sh" | bash -s next-susfs
                 git clone https://gitlab.com/simonpunk/susfs4ksu.git -b gki-android14-6.1
                 cd susfs4ksu
-                cp ./kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch ../aosp/KernelSU
-                cp ./kernel_patches/50_add_susfs_in_gki-android14-6.1.patch ../aosp/
-                cp ./kernel_patches/fs/* ../aosp/fs/
-                cp ./kernel_patches/include/linux/* ../aosp/include/linux/
-                cd ../aosp/KernelSU
+                cp ./kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch ../KernelSU-Next
+                cp ./kernel_patches/50_add_susfs_in_gki-android14-6.1.patch ../
+                cp ./kernel_patches/fs/* ../fs/
+                cp ./kernel_patches/include/linux/* ../include/linux/
+                cd ../KernelSU-Next
                 patch -p1 < 10_enable_susfs_for_ksu.patch
                 cd ..
                 patch -p1 < 50_add_susfs_in_gki-android14-6.1.patch
