@@ -134,6 +134,7 @@ jobs:
                 cp -r private_devices_google_bluejay/* kernel/private/devices/google/bluejay/
 
             - name: build gki with kernelsu-next with susfs
+              if: always()
               run: |
                 cd ~
                 cd kernel/aosp
@@ -262,6 +263,7 @@ jobs:
                 repo sync -c -j$(nproc --all) --no-tags --no-clone-bundle --force-sync
 
             - name: build gki with kernelsu-next with susfs
+              if: always()
               run: |
                 cd ~
                 cd kernel/aosp
