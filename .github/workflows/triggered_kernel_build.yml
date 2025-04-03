@@ -52,6 +52,16 @@ jobs:
                  name: bluejay_gki
                  path: |
                     ~/kernel/out/bluejay/dist
+
+            - name: upload to branch
+              run: |
+                git checkout prebuilt_bluejay_gki
+                rm -rf *
+                cp -rf ~/kernel/out/bluejay/dist .
+                git add -A
+                git commit -m '[kernel buildbot] tvy: upload prebuilt to branch' --signoff
+                git push
+
     bluejay_gki-ksunext:
         runs-on: ubuntu-22.04
         steps:
@@ -100,6 +110,15 @@ jobs:
                  name: bluejay_gki-ksunext
                  path: |
                     ~/kernel/out/bluejay/dist
+
+            - name: upload to branch
+              run: |
+                git checkout prebuilt_bluejay_gki-ksunext
+                rm -rf *
+                cp -rf ~/kernel/out/bluejay/dist .
+                git add -A
+                git commit -m '[kernel buildbot] tvy: upload prebuilt to branch' --signoff
+                git push
     
     pantah_gki:
         runs-on: ubuntu-22.04
@@ -138,6 +157,16 @@ jobs:
                  name: pantah_gki
                  path: |
                     ~/kernel/out/pantah/dist
+              
+            - name: upload to branch
+              run: |
+                git checkout prebuilt_pantah_gki
+                rm -rf *
+                cp -rf ~/kernel/out/pantah/dist .
+                git add -A
+                git commit -m '[kernel buildbot] tnhi: upload prebuilt to branch' --signoff
+                git push
+          
     pantah_gki-ksunext:
         runs-on: ubuntu-22.04
         steps:
@@ -179,3 +208,12 @@ jobs:
                  name: pantah_gki-ksunext
                  path: |
                     ~/kernel/out/pantah/dist
+
+            - name: upload to branch
+              run: |
+                git checkout prebuilt_pantah_gki-ksunext
+                rm -rf *
+                cp -rf ~/kernel/out/pantah/dist .
+                git add -A
+                git commit -m '[kernel buildbot] tnhi: upload prebuilt to branch' --signoff
+                git push
