@@ -137,7 +137,7 @@ jobs:
               with:
                  name: pantah_gki
                  path: |
-                    ~/kernel/out/bluejay/dist
+                    ~/kernel/out/pantah/dist
     pantah_gki-ksunext:
         runs-on: ubuntu-22.04
         steps:
@@ -178,5 +178,4 @@ jobs:
               with:
                  name: pantah_gki-ksunext
                  path: |
-                    ~/kernel/out/bluejay/dist
-    
+                    ~/kernel/out/pantah/dist

@@ -21,14 +21,7 @@ cd kernel
 BUILD_KERNEL=1 ./build_$tg.sh --config=no_download_gki_fips140 --config=no_download_gki --kernel_package=@//aosp --lto=thin "${@:2}"
 cd .. # god damn it gh
 
-dst=~/${tg}_${BUILD_TYPE}
-mkdir -p $dst
-if [ -d $dst ]; then
-	rm -rf $dst/*
-fi
-
-# copy out and make not executable
-cp -rf out/$tg/dist/* $dst/
+dst=~/kernel/out/${tg}/dist
 chmod -x $dst/*
 
 # deflate kernel headers
