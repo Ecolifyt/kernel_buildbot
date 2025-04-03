@@ -133,8 +133,8 @@ jobs:
                 git clone https://github.com/tvyiutnhisokewt/private_devices_google_bluejay
                 cp -r private_devices_google_bluejay/* kernel/private/devices/google/bluejay/
 
-            - name: build gki with kernelsu-next with susfs
-              if: always()
+            - name: patch susfs
+              continue-on-error: true
               run: |
                 cd ~
                 NDK_PATH="$(pwd)/kernel/prebuilts/ndk-r23/"
@@ -151,6 +151,10 @@ jobs:
                 patch -p1 < 10_enable_susfs_for_ksu.patch
                 cd ..
                 patch -p1 < 50_add_susfs_in_gki-android14-6.1.patch
+
+            - name: build gki with kernelsu-next with susfs
+              if: always()
+              run: |
                 cd ~
                 BUILD_TYPE=gki-ksunext-susfs ./kernel/buildscript bluejay
 
@@ -264,8 +268,8 @@ jobs:
                 repo init -u https://android.googlesource.com/kernel/manifest.git -b android-gs-pantah-6.1-android15-qpr2-beta --depth 1
                 repo sync -c -j$(nproc --all) --no-tags --no-clone-bundle --force-sync
 
-            - name: build gki with kernelsu-next with susfs
-              if: always()
+            - name: patch susfs
+              continue-on-error: true
               run: |
                 cd ~
                 NDK_PATH="$(pwd)/kernel/prebuilts/ndk-r23/"
@@ -282,6 +286,10 @@ jobs:
                 patch -p1 < 10_enable_susfs_for_ksu.patch
                 cd ..
                 patch -p1 < 50_add_susfs_in_gki-android14-6.1.patch
+
+            - name: build gki with kernelsu-next with susfs
+              if: always()
+              run: |
                 cd ~
                 BUILD_TYPE=gki-ksunext-susfs ./kernel/buildscript pantah
 
