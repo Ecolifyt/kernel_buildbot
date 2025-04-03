@@ -137,10 +137,12 @@ jobs:
               if: always()
               run: |
                 cd ~
+                NDK_PATH="$(pwd)/kernel/prebuilts/ndk-r23/"
                 cd kernel/aosp
                 curl -LSs "https://raw.githubusercontent.com/rifsxd/KernelSU-Next/next-susfs/kernel/setup.sh" | bash -s next-susfs
                 git clone https://gitlab.com/simonpunk/susfs4ksu.git -b gki-android14-6.1
                 cd susfs4ksu
+                PATH="${PATH}:${NDK_PATH}" ./build_ksu_susfs_tool.sh
                 cp ./kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch ../KernelSU-Next
                 cp ./kernel_patches/50_add_susfs_in_gki-android14-6.1.patch ../
                 cp ./kernel_patches/fs/* ../fs/
@@ -266,10 +268,12 @@ jobs:
               if: always()
               run: |
                 cd ~
+                NDK_PATH="$(pwd)/kernel/prebuilts/ndk-r23/"
                 cd kernel/aosp
                 curl -LSs "https://raw.githubusercontent.com/rifsxd/KernelSU-Next/next-susfs/kernel/setup.sh" | bash -s next-susfs
                 git clone https://gitlab.com/simonpunk/susfs4ksu.git -b gki-android14-6.1
                 cd susfs4ksu
+                PATH="${PATH}:${NDK_PATH}" ./build_ksu_susfs_tool.sh
                 cp ./kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch ../KernelSU-Next
                 cp ./kernel_patches/50_add_susfs_in_gki-android14-6.1.patch ../
                 cp ./kernel_patches/fs/* ../fs/
