@@ -36,6 +36,11 @@ jobs:
                 repo init -u https://android.googlesource.com/kernel/manifest.git -b android-gs-bluejay-6.1-android15-qpr2-beta --depth 1
                 repo sync -c -j$(nproc --all) --no-tags --no-clone-bundle --force-sync
             
+            - name: checkout android14-6.1-lts
+              run: |
+                cd ~/kernel
+                git clone https://android.googlesource.com/kernel/common -b android14-6.1-lts --depth=1 a14-6.1-lts
+            
             - name: bluejay 90hz patch
               run: |
                 cd ~
@@ -53,7 +58,7 @@ jobs:
               with:
                  name: bluejay_gki
                  path: |
-                    ~/kernel/out/bluejay/dist
+                    ~/kernel/out/bluejay/dist/*
 
             - name: upload to branch
               run: |
@@ -91,6 +96,11 @@ jobs:
                 cd kernel
                 repo init -u https://android.googlesource.com/kernel/manifest.git -b android-gs-bluejay-6.1-android15-qpr2-beta --depth 1
                 repo sync -c -j$(nproc --all) --no-tags --no-clone-bundle --force-sync
+
+            - name: checkout android14-6.1-lts
+              run: |
+                cd ~/kernel
+                git clone https://android.googlesource.com/kernel/common -b android14-6.1-lts --depth=1 a14-6.1-lts
             
             - name: bluejay 90hz patch
               run: |
@@ -113,7 +123,7 @@ jobs:
               with:
                  name: bluejay_gki-ksunext
                  path: |
-                    ~/kernel/out/bluejay/dist
+                    ~/kernel/out/bluejay/dist/*
 
             - name: upload to branch
               run: |
@@ -151,6 +161,11 @@ jobs:
                 cd kernel
                 repo init -u https://android.googlesource.com/kernel/manifest.git -b android-gs-pantah-6.1-android15-qpr2-beta --depth 1
                 repo sync -c -j$(nproc --all) --no-tags --no-clone-bundle --force-sync
+
+            - name: checkout android14-6.1-lts
+              run: |
+                cd ~/kernel
+                git clone https://android.googlesource.com/kernel/common -b android14-6.1-lts --depth=1 a14-6.1-lts
   
             - name: build gki
               run: |
@@ -162,7 +177,7 @@ jobs:
               with:
                  name: pantah_gki
                  path: |
-                    ~/kernel/out/pantah/dist
+                    ~/kernel/out/pantah/dist/*
               
             - name: upload to branch
               run: |
@@ -201,6 +216,11 @@ jobs:
                 repo init -u https://android.googlesource.com/kernel/manifest.git -b android-gs-pantah-6.1-android15-qpr2-beta --depth 1
                 repo sync -c -j$(nproc --all) --no-tags --no-clone-bundle --force-sync
 
+            - name: checkout android14-6.1-lts
+              run: |
+                cd ~/kernel
+                git clone https://android.googlesource.com/kernel/common -b android14-6.1-lts --depth=1 a14-6.1-lts
+
             - name: build gki with kernelsu-next
               run: |
                 cd ~
@@ -215,7 +235,7 @@ jobs:
               with:
                  name: pantah_gki-ksunext
                  path: |
-                    ~/kernel/out/pantah/dist
+                    ~/kernel/out/pantah/dist/*
 
             - name: upload to branch
               run: |

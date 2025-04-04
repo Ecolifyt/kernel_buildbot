@@ -18,7 +18,7 @@ fi
 
 # build kernel
 cd kernel
-BUILD_KERNEL=1 ./build_$tg.sh --config=no_download_gki_fips140 --config=no_download_gki --kernel_package=@//aosp --lto=thin "${@:2}"
+BUILD_KERNEL=1 ./build_$tg.sh --config=no_download_gki_fips140 --config=no_download_gki --kernel_package=@//a14-6.1-lts --lto=thin "${@:2}"
 cd .. # god damn it gh
 
 dst=~/kernel/out/${tg}/dist
