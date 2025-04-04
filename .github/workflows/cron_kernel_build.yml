@@ -35,7 +35,8 @@ jobs:
             - name: checkout android14-6.1-lts
               run: |
                 cd ~/kernel
-                git clone https://android.googlesource.com/kernel/common -b android14-6.1-lts --depth=1 a14-6.1-lts
+                rm -rf aosp/
+                git clone https://android.googlesource.com/kernel/common -b android14-6.1-lts --depth=1 aosp
             
             - name: bluejay 90hz patch
               run: |
@@ -96,7 +97,8 @@ jobs:
             - name: checkout android14-6.1-lts
               run: |
                 cd ~/kernel
-                git clone https://android.googlesource.com/kernel/common -b android14-6.1-lts --depth=1 a14-6.1-lts
+                rm -rf aosp/
+                git clone https://android.googlesource.com/kernel/common -b android14-6.1-lts --depth=1 aosp
             
             - name: bluejay 90hz patch
               run: |
@@ -161,7 +163,8 @@ jobs:
             - name: checkout android14-6.1-lts
               run: |
                 cd ~/kernel
-                git clone https://android.googlesource.com/kernel/common -b android14-6.1-lts --depth=1 a14-6.1-lts
+                rm -rf aosp/
+                git clone https://android.googlesource.com/kernel/common -b android14-6.1-lts --depth=1 aosp
   
             - name: build gki
               run: |
@@ -215,7 +218,8 @@ jobs:
             - name: checkout android14-6.1-lts
               run: |
                 cd ~/kernel
-                git clone https://android.googlesource.com/kernel/common -b android14-6.1-lts --depth=1 a14-6.1-lts
+                rm -rf aosp/
+                git clone https://android.googlesource.com/kernel/common -b android14-6.1-lts --depth=1 aosp
 
             - name: build gki with kernelsu-next
               run: |
