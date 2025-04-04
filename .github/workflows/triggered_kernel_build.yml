@@ -41,13 +41,6 @@ jobs:
                 cd ~/kernel
                 rm -rf aosp/
                 git clone https://android.googlesource.com/kernel/common -b android14-6.1-lts --depth=1 aosp
-            
-            - name: bluejay 90hz patch
-              run: |
-                cd ~
-                rm -rf kernel/private/devices/google/bluejay/*
-                git clone https://github.com/tvyiutnhisokewt/private_devices_google_bluejay
-                cp -r private_devices_google_bluejay/* kernel/private/devices/google/bluejay/
   
             - name: build gki
               run: |
@@ -103,13 +96,6 @@ jobs:
                 cd ~/kernel
                 rm -rf aosp/
                 git clone https://android.googlesource.com/kernel/common -b android14-6.1-lts --depth=1 aosp
-            
-            - name: bluejay 90hz patch
-              run: |
-                cd ~
-                rm -rf kernel/private/devices/google/bluejay/*
-                git clone https://github.com/tvyiutnhisokewt/private_devices_google_bluejay
-                cp -r private_devices_google_bluejay/* kernel/private/devices/google/bluejay/
 
             - name: build gki with kernelsu-next
               run: |
