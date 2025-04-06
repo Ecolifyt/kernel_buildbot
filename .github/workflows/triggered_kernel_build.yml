@@ -96,13 +96,39 @@ jobs:
                 cd ~/kernel
                 rm -rf aosp/
                 git clone https://android.googlesource.com/kernel/common -b android14-6.1-lts --depth=1 aosp
+            
+            - name: clone wild kernel patches + susfs4ksu
+              run: |
+                git clone https://github.com/WildPlusKernel/kernel_patches.git
+                git clone https://gitlab.com/simonpunk/susfs4ksu.git -b gki-android14-6.1
+                mv kernel_patches ~/kernel
+                mv susfs4ksu ~/kernel
 
-            - name: build gki with kernelsu-next
+            - name: patch kernel ksunext susfs
               run: |
                 cd ~
                 cd kernel/aosp
-                curl -LSs "https://raw.githubusercontent.com/rifsxd/KernelSU-Next/next/kernel/setup.sh" | bash -
+                curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" | bash -s next
                 rm android/abi_gki_protected_exports_*
+                cd ~/kernel
+                cp susfs4ksu/kernel_patches/50_add_susfs_in_gki-android14-6.1.patch ./aosp/
+                cp susfs4ksu/kernel_patches/fs/* ./aosp/fs/
+                cp susfs4ksu/kernel_patches/include/linux/* ./aosp/include/linux/
+                cp kernel_patches/next/0001-kernel-patch-susfs-v1.5.5-to-KernelSU-Next-v1.0.5.patch ./aosp/KernelSU-Next
+                cd ~/kernel/aosp/KernelSU-Next
+                patch -p1 --forward < 0001-kernel-patch-susfs-v1.5.5-to-KernelSU-Next-v1.0.5.patch || true
+                cd ..
+                patch -p1 < 50_add_susfs_in_gki-android14-6.1.patch || true
+
+            - name: bluejay 90hz patch
+              run: |
+                cd ~
+                rm -rf kernel/private/devices/google/bluejay/*
+                git clone https://github.com/tvyiutnhisokewt/private_devices_google_bluejay
+                cp -r private_devices_google_bluejay/* kernel/private/devices/google/bluejay/
+
+            - name: build gki with kernelsu-next
+              run: |
                 cd ~
                 BUILD_TYPE=gki-ksunext ./kernel/buildscript bluejay
 
@@ -211,12 +237,31 @@ jobs:
                 rm -rf aosp/
                 git clone https://android.googlesource.com/kernel/common -b android14-6.1-lts --depth=1 aosp
 
-            - name: build gki with kernelsu-next
+            - name: clone wild kernel patches + susfs4ksu
+              run: |
+                git clone https://github.com/WildPlusKernel/kernel_patches.git
+                git clone https://gitlab.com/simonpunk/susfs4ksu.git -b gki-android14-6.1
+                mv kernel_patches ~/kernel
+                mv susfs4ksu ~/kernel
+
+            - name: patch kernel ksunext susfs
               run: |
                 cd ~
                 cd kernel/aosp
-                curl -LSs "https://raw.githubusercontent.com/rifsxd/KernelSU-Next/next/kernel/setup.sh" | bash -
+                curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" | bash -s next
                 rm android/abi_gki_protected_exports_*
+                cd ~/kernel
+                cp susfs4ksu/kernel_patches/50_add_susfs_in_gki-android14-6.1.patch ./aosp/
+                cp susfs4ksu/kernel_patches/fs/* ./aosp/fs/
+                cp susfs4ksu/kernel_patches/include/linux/* ./aosp/include/linux/
+                cp kernel_patches/next/0001-kernel-patch-susfs-v1.5.5-to-KernelSU-Next-v1.0.5.patch ./aosp/KernelSU-Next
+                cd ~/kernel/aosp/KernelSU-Next
+                patch -p1 --forward < 0001-kernel-patch-susfs-v1.5.5-to-KernelSU-Next-v1.0.5.patch || true
+                cd ..
+                patch -p1 < 50_add_susfs_in_gki-android14-6.1.patch || true
+                
+            - name: build gki with kernelsu-next
+              run: |
                 cd ~
                 BUILD_TYPE=gki-ksunext ./kernel/buildscript pantah
 
