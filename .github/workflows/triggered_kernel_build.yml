@@ -58,7 +58,7 @@ jobs:
               run: |
                 git checkout prebuilt_bluejay_gki
                 rm -rf *
-                cp -rf ~/kernel/out/bluejay/dist .
+                cp -rf ~/kernel/out/bluejay/dist/* .
                 git add -A
                 git commit -m '[kernel buildbot] tvy: upload prebuilt to branch' --signoff
                 git push -u origin prebuilt_bluejay_gki
@@ -189,7 +189,7 @@ jobs:
               run: |
                 git checkout prebuilt_bluejay_gki-ksunext
                 rm -rf *
-                cp -rf ~/kernel/out/bluejay/dist .
+                cp -rf ~/kernel/out/bluejay/dist/* .
                 git add -A
                 git commit -m '[kernel buildbot] tvy: upload prebuilt to branch' --signoff
                 git push -u origin prebuilt_bluejay_gki-ksunext
@@ -244,7 +244,7 @@ jobs:
               run: |
                 git checkout prebuilt_pantah_gki
                 rm -rf *
-                cp -rf ~/kernel/out/pantah/dist .
+                cp -rf ~/kernel/out/pantah/dist/* .
                 git add -A
                 git commit -m '[kernel buildbot] tnhi: upload prebuilt to branch' --signoff
                 git push -u origin prebuilt_pantah_gki
@@ -368,7 +368,7 @@ jobs:
               run: |
                 git checkout prebuilt_pantah_gki-ksunext
                 rm -rf *
-                cp -rf ~/kernel/out/pantah/dist .
+                cp -rf ~/kernel/out/pantah/dist/* .
                 git add -A
                 git commit -m '[kernel buildbot] tnhi: upload prebuilt to branch' --signoff
                 git push -u origin prebuilt_pantah_gki-ksunext
