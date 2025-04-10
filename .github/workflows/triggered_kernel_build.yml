@@ -8,7 +8,7 @@ on:
             - sauce
     workflow_dispatch:
 jobs:
-    bluejay_gki:
+    pantah_gki:
         runs-on: ubuntu-22.04
         steps:
             - name: checkout scripts
@@ -33,7 +33,7 @@ jobs:
                 mkdir kernel
                 cp buildscript kernel
                 cd kernel
-                repo init -u https://android.googlesource.com/kernel/manifest.git -b android-gs-bluejay-6.1-android15-qpr2-beta --depth 1
+                repo init -u https://android.googlesource.com/kernel/manifest.git -b android-gs-pantah-6.1-android15-qpr2-beta --depth 1
                 repo sync -c -j$(nproc --all) --no-tags --no-clone-bundle --force-sync
             
             - name: checkout android14-6.1-lts
@@ -45,25 +45,25 @@ jobs:
             - name: build gki
               run: |
                 cd ~
-                BUILD_TYPE=gki ./kernel/buildscript bluejay
+                BUILD_TYPE=gki ./kernel/buildscript pantah
 
             - name: upload build artifacts
               uses: actions/upload-artifact@v4
               with:
-                 name: bluejay_gki
+                 name: pantah_gki
                  path: |
-                    ~/kernel/out/bluejay/dist/*
+                    ~/kernel/out/pantah/dist/*
 
             - name: upload to branch
               run: |
-                git checkout prebuilt_bluejay_gki
+                git checkout prebuilt_pantah_gki
                 rm -rf *
-                cp -rf ~/kernel/out/bluejay/dist/* .
+                cp -rf ~/kernel/out/pantah/dist/* .
                 git add -A
                 git commit -m '[kernel buildbot] tvy: upload prebuilt to branch' --signoff
-                git push -u origin prebuilt_bluejay_gki
+                git push -u origin prebuilt_pantah_gki
 
-    bluejay_gki-ksunext:
+    pantah_gki-ksunext:
         runs-on: ubuntu-22.04
         steps:
             - name: checkout scripts
@@ -88,7 +88,7 @@ jobs:
                 mkdir kernel
                 cp buildscript kernel
                 cd kernel
-                repo init -u https://android.googlesource.com/kernel/manifest.git -b android-gs-bluejay-6.1-android15-qpr2-beta --depth 1
+                repo init -u https://android.googlesource.com/kernel/manifest.git -b android-gs-pantah-6.1-android15-qpr2-beta --depth 1
                 repo sync -c -j$(nproc --all) --no-tags --no-clone-bundle --force-sync
 
             - name: checkout android14-6.1-lts
@@ -166,33 +166,26 @@ jobs:
                 sed -i "/stable_scmversion_cmd/s/-maybe-dirty//g" ./build/kernel/kleaf/impl/stamp.bzl
                 sed -E -i '/^CONFIG_LOCALVERSION=/ s/(.*)"$/\1-tvyiutnhisokewt"/' ./aosp/arch/arm64/configs/gki_defconfig
 
-            - name: bluejay 90hz patch
-              run: |
-                cd ~
-                rm -rf kernel/private/devices/google/bluejay/*
-                git clone https://github.com/tvyiutnhisokewt/private_devices_google_bluejay
-                cp -r private_devices_google_bluejay/* kernel/private/devices/google/bluejay/
-
             - name: build gki with kernelsu-next
               run: |
                 cd ~
-                BUILD_TYPE=gki-ksunext ./kernel/buildscript bluejay
+                BUILD_TYPE=gki-ksunext ./kernel/buildscript pantah
 
             - name: upload build artifacts
               uses: actions/upload-artifact@v4
               with:
-                 name: bluejay_gki-ksunext
+                 name: pantah_gki-ksunext
                  path: |
-                    ~/kernel/out/bluejay/dist/*
+                    ~/kernel/out/pantah/dist/*
 
             - name: upload to branch
               run: |
-                git checkout prebuilt_bluejay_gki-ksunext
+                git checkout prebuilt_pantah_gki-ksunext
                 rm -rf *
-                cp -rf ~/kernel/out/bluejay/dist/* .
+                cp -rf ~/kernel/out/pantah/dist/* .
                 git add -A
                 git commit -m '[kernel buildbot] tvy: upload prebuilt to branch' --signoff
-                git push -u origin prebuilt_bluejay_gki-ksunext
+                git push -u origin prebuilt_pantah_gki-ksunext
     
     pantah_gki:
         runs-on: ubuntu-22.04
