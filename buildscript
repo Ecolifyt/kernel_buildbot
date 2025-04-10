@@ -31,9 +31,4 @@ LINK="https://android.googlesource.com/device/google/${tg}-kernels/${KERNEL_VERS
 wget ${LINK} -O /tmp/original-kernel-headers.tar.gz
 tar zxvf /tmp/original-kernel-headers.tar.gz -C $dst/kernel-headers
 
-# cleanup
-for files in "*.tar.gz" "dtb.img" "*.dtbo" "Image" "Image.gz" "kernel_aarch64_modules" "kernel_kmi_symbol_list_violations_checked" "kernel_modules" "system_dlkm.img" "vendor_dlkm.img" "vendor_kernel_boot.img" "vmlinux*"; do
-	rm $dst/$files
-done
-
 exit 0
