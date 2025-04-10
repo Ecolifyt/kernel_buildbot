@@ -6,6 +6,7 @@ on:
         description: 'Kernel variant to build'
         required: true
         type: choice
+        default: gki-ksunext
         options:
           - gki
           - gki-ksunext
