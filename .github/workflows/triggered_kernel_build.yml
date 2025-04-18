@@ -65,8 +65,7 @@ jobs:
         run: |
           cd ~
           cd kernel/aosp
-          curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" | bash -s next
-          rm android/abi_gki_protected_exports_*
+          curl -LSs "https://raw.githubusercontent.com/rifsxd/KernelSU-Next/next/kernel/setup.sh" | bash -s next          rm android/abi_gki_protected_exports_*
           cd ~/kernel
           cp susfs4ksu/kernel_patches/50_add_susfs_in_gki-android14-6.1.patch ./aosp/
           cp susfs4ksu/kernel_patches/fs/* ./aosp/fs/
