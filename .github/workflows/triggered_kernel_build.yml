@@ -44,6 +44,12 @@ jobs:
           cd kernel
           repo init -u https://android.googlesource.com/kernel/manifest.git -b android-gs-pantah-6.1-android15-qpr2-beta --depth 1
           repo sync -c -j16 --no-tags --no-clone-bundle --force-sync
+
+      - name: checkout android14-6.1-lts
+        run: |
+          cd ~/kernel
+          rm -rf aosp/
+          git clone https://android.googlesource.com/kernel/common -b android14-6.1-lts --depth=1 aosp
       
       # KSU specific steps
       - name: clone wild kernel patches + susfs4ksu
@@ -59,7 +65,7 @@ jobs:
         run: |
           cd ~
           cd kernel/aosp
-          curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" | bash -s next
+          curl -LSs "https://raw.githubusercontent.com/rifsxd/KernelSU-Next/next-susfs/kernel/setup.sh" | bash -s next-susfs
           rm android/abi_gki_protected_exports_*
           cd ~/kernel
           cp susfs4ksu/kernel_patches/50_add_susfs_in_gki-android14-6.1.patch ./aosp/
@@ -71,9 +77,9 @@ jobs:
           cd ..
           patch -p1 < 50_add_susfs_in_gki-android14-6.1.patch || true
           cd ~/kernel/aosp
-          cp ../kernel_patches/next/syscall_hooks.patch ./ 
+          cp ../kernel_patches/next/syscall64_hooks.patch ./ 
           cp ../kernel_patches/69_hide_stuff.patch ./ 
-          patch -p1 -F 3 < syscall_hooks.patch
+          patch -p1 -F 3 < syscall64_hooks.patch
           patch -p1 -F 3 < 69_hide_stuff.patch
           cd ~/kernel
           echo "Adding configuration settings to gki_defconfig..."
