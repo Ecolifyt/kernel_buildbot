@@ -65,7 +65,7 @@ jobs:
         run: |
           cd ~
           cd kernel/aosp
-          curl -LSs "https://raw.githubusercontent.com/rifsxd/KernelSU-Next/next-susfs/kernel/setup.sh" | bash -s next-susfs
+          curl -LSs "https://raw.githubusercontent.com/KernelSU-Next/KernelSU-Next/next/kernel/setup.sh" | bash -s next
           rm android/abi_gki_protected_exports_*
           cd ~/kernel
           cp susfs4ksu/kernel_patches/50_add_susfs_in_gki-android14-6.1.patch ./aosp/
@@ -74,7 +74,9 @@ jobs:
           cp kernel_patches/next/0001-kernel-patch-susfs-v1.5.5-to-KernelSU-Next-v1.0.5.patch ./aosp/KernelSU-Next
           cd ~/kernel/aosp
           patch -p1 < 50_add_susfs_in_gki-android14-6.1.patch || true
-          cd ~/kernel/aosp
+          cd ~/kernel/aosp/KernelSU-Next
+          patch -p1 --forward < 0001-kernel-patch-susfs-v1.5.5-to-KernelSU-Next-v1.0.5.patch || true
+          cd ..
           cp ../kernel_patches/next/syscall64_hooks.patch ./ 
           cp ../kernel_patches/69_hide_stuff.patch ./ 
           patch -p1 -F 3 < syscall64_hooks.patch
