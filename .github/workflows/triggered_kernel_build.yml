@@ -32,8 +32,13 @@ jobs:
       
       - name: checkout aosp kernel build system
         run: |
+          rm -rf ~/buildscript
+          rm -rf ~/kernel
+          rm -rf ~/kernel_patches
+          rm -rf ~/susfs4ksu
+          rm -rf ~/GS201_A15_GKI_6.1_Next_SUSFS.zip
           cp buildscript ~ 
-          cd ~
+          cd ~        
           mkdir kernel
           cp buildscript kernel
           cd kernel
