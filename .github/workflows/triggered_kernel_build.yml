@@ -38,14 +38,8 @@ jobs:
           cp buildscript kernel
           cd kernel
           repo init -u https://android.googlesource.com/kernel/manifest.git -b android-gs-pantah-6.1-android15-qpr2-beta --depth 1
-          repo sync -c -j4 --no-tags --no-clone-bundle --force-sync
+          repo sync -c -j16 --no-tags --no-clone-bundle --force-sync
       
-      - name: checkout android14-6.1-lts
-        run: |
-          cd ~/kernel
-          rm -rf aosp/
-          git clone https://android.googlesource.com/kernel/common -b android14-6.1-lts --depth=1 aosp
-
       # KSU specific steps
       - name: clone wild kernel patches + susfs4ksu
         if: github.event.inputs.kernel_variant == 'gki-ksunext' || contains(github.ref, 'gki_ksu')
@@ -112,24 +106,24 @@ jobs:
           echo "CONFIG_TCP_CONG_WESTWOOD=n" >> ./aosp/arch/arm64/configs/gki_defconfig
           echo "CONFIG_TCP_CONG_HTCP=n" >> ./aosp/arch/arm64/configs/gki_defconfig
           sed -i 's/check_defconfig//' ./aosp/build.config.gki
-          cd ~/kernel
-          sed -i '$s|echo "\$res"|echo "\$res-tvyiutnhisokewt"|' ./aosp/scripts/setlocalversion
-          perl -pi -e 's{UTS_VERSION="\$\(echo \$UTS_VERSION \$CONFIG_FLAGS \$TIMESTAMP \| cut -b -\$UTS_LEN\)"}{UTS_VERSION="#1 SMP PREEMPT Sat Apr 20 04:20:00 UTC 2024"}' ./aosp/scripts/mkcompile_h
-          sed -i "/stable_scmversion_cmd/s/-maybe-dirty//g" ./build/kernel/kleaf/impl/stamp.bzl
-          sed -E -i '/^CONFIG_LOCALVERSION=/ s/(.*)"$/\1-tvyiutnhisokewt"/' ./aosp/arch/arm64/configs/gki_defconfig
-
+          
       - name: build kernel
         run: |
           cd ~
           BUILD_TYPE=${{ github.event.inputs.kernel_variant || 'gki' }} ./kernel/buildscript pantah
 
-      - name: zip kernel build output
+      - name: Pack AnyKernel3
         run: |
-          cd ~/kernel/out/pantah
-          zip -r dist.zip dist
+          cd ~/kernel
+          git clone --recursive --depth=1 -j $(nproc) https://github.com/EduardoA3677/AnyKernel3.git AnyKernel3
+          cp ~/kernel/out/pantah/dist/Image.lz4 ~/kernel/AnyKernel3/Image.lz4
+          cat ~/kernel/out/pantah/dist/*.dtb > ~/kernel/AnyKernel3/dtb
+          cp ~/kernel/out/pantah/dist/dtbo.img ~/kernel/AnyKernel3/dtbo.img
+          cd ~/kernel/AnyKernel3
+          zip -r "../GS201_A15_GKI_6.1_Next_SUSFS.zip" ./*
 
       - name: upload dist.zip as artifact
         uses: actions/upload-artifact@v4
         with:
           name: kernel-dist-${{ github.event.inputs.kernel_variant || 'gki' }}
-          path: ~/kernel/out/pantah/dist.zip
+          path: ~/kernel/GS201_A15_GKI_6.1_Next_SUSFS.zip
