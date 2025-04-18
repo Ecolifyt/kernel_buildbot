@@ -153,7 +153,7 @@ jobs:
       - name: upload images build zip as artifact
         uses: actions/upload-artifact@v4
         with:
-          name: kernel-dist-${{ github.event.inputs.kernel_variant || 'gki' }}
+          name: kernel-imgs-${{ github.event.inputs.kernel_variant || 'gki' }}
           path: ~/kernel/out/pantah/dist/imgs/imgs.zip
           
       - name: upload AnyKernel3 zip as artifact
