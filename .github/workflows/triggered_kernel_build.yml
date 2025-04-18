@@ -141,7 +141,6 @@ jobs:
           cd imgs
           zip -r "imgs.zip" ./*
 
-      - name: upload imgages zip as artifact
       - name: upload images build zip as artifact
         uses: actions/upload-artifact@v4
         with:
