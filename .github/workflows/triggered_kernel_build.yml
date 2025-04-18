@@ -13,7 +13,7 @@ on:
 
 jobs:
   build_kernel:
-    runs-on: self-hosted
+    runs-on: ubuntu-22.04
     steps:
       - name: checkout scripts
         uses: actions/checkout@v4
@@ -32,18 +32,13 @@ jobs:
       
       - name: checkout aosp kernel build system
         run: |
-          rm -rf ~/buildscript
-          rm -rf ~/kernel
-          rm -rf ~/kernel_patches
-          rm -rf ~/susfs4ksu
-          rm -rf ~/GS201_A15_GKI_6.1_Next_SUSFS.zip
           cp buildscript ~ 
           cd ~        
           mkdir kernel
           cp buildscript kernel
           cd kernel
           repo init -u https://android.googlesource.com/kernel/manifest.git -b android-gs-pantah-6.1-android15-qpr2-beta --depth 1
-          repo sync -c -j16 --no-tags --no-clone-bundle --force-sync
+          repo sync -c -j6 --no-tags --no-clone-bundle --force-sync
 
       - name: checkout android14-6.1-lts
         run: |
@@ -65,7 +60,8 @@ jobs:
         run: |
           cd ~
           cd kernel/aosp
-          curl -LSs "https://raw.githubusercontent.com/rifsxd/KernelSU-Next/next/kernel/setup.sh" | bash -s next          rm android/abi_gki_protected_exports_*
+          curl -LSs "https://raw.githubusercontent.com/rifsxd/KernelSU-Next/next/kernel/setup.sh" | bash -s next
+          rm android/abi_gki_protected_exports_*
           cd ~/kernel
           cp susfs4ksu/kernel_patches/50_add_susfs_in_gki-android14-6.1.patch ./aosp/
           cp susfs4ksu/kernel_patches/fs/* ./aosp/fs/
@@ -137,6 +133,21 @@ jobs:
           cd ~/kernel/AnyKernel3
           zip -r "../GS201_A15_GKI_6.1_Next_SUSFS.zip" ./*
 
+      - name: zip kernel build imgs output
+        run: |
+          cd ~/kernel/out/pantah
+          mkdir imgs
+          cp *.img imgs
+          cd imgs
+          zip -r "imgs.zip" ./*
+
+      - name: upload imgages zip as artifact
+      - name: upload images build zip as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kernel-dist-${{ github.event.inputs.kernel_variant || 'gki' }}
+          path: ~/kernel/out/pantah/imgs/imgs.zip
+          
       - name: upload AnyKernel3 zip as artifact
         uses: actions/upload-artifact@v4
         with:
