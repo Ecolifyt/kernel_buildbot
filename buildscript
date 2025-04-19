@@ -15,7 +15,7 @@ fi
 
 # build kernel
 cd kernel
-BUILD_AOSP_KERNEL=1 ./build_$tg.sh  --kernel_package=@//aosp --config=no_download_gki --lto=full "${@:2}"
+BUILD_KERNEL=1 ./build_$tg.sh --config=no_download_gki_fips140 --config=no_download_gki --config=use_source_tree_aosp --kernel_package=@//aosp --lto=thin "${@:2}"
 cd .. # god damn it gh
 
 exit 0
