@@ -56,11 +56,10 @@ jobs:
           cd kernel/aosp
           curl -LSs "https://raw.githubusercontent.com/rifsxd/KernelSU-Next/next/kernel/setup.sh" | bash -s next-susfs
           git submodule update --init --recursive
-          cd KernelSU-Next/kernel
+          cd KernelSU-Next
           KSU_VERSION=$(expr $(/usr/bin/git rev-list --count HEAD) "+" 10200)
           echo "KSUVER=$KSU_VERSION" >> $GITHUB_ENV
           sed -i "s/DKSU_VERSION=11998/DKSU_VERSION=${KSU_VERSION}/" Makefile
-          cd ..
           cd ..
           rm android/abi_gki_protected_exports_*
           cd ~/kernel
@@ -73,9 +72,9 @@ jobs:
           cd ~/kernel/aosp/KernelSU-Next
           #patch -p1 --forward < 0001-kernel-patch-susfs-v1.5.5-to-KernelSU-Next-v1.0.5.patch || true
           cd ..
-          cp ../kernel_patches/next/syscall64_hooks.patch ./ 
+          cp ../kernel_patches/next/syscall_hooks.patch ./ 
           cp ../kernel_patches/69_hide_stuff.patch ./ 
-          patch -p1 -F 3 < syscall64_hooks.patch
+          patch -p1 -F 3 < syscall_hooks.patch
           patch -p1 -F 3 < 69_hide_stuff.patch
           cd ~/kernel
           echo "Adding configuration settings to gki_defconfig..."
@@ -112,8 +111,6 @@ jobs:
           echo "CONFIG_TCP_CONG_BIC=n" >> ./aosp/arch/arm64/configs/gki_defconfig
           echo "CONFIG_TCP_CONG_WESTWOOD=n" >> ./aosp/arch/arm64/configs/gki_defconfig
           echo "CONFIG_TCP_CONG_HTCP=n" >> ./aosp/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_COMPAT=y" >> ./aosp/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_KSU_VFS=y" >> ./aosp/arch/arm64/configs/gki_defconfig
           sed -i 's/check_defconfig//' ./aosp/build.config.gki
           cd ~/kernel
           sed -i '$s|echo "\$res"|echo "\$res-eduardo"|' ./aosp/scripts/setlocalversion
