@@ -131,6 +131,32 @@ jobs:
           cd ~
           BUILD_TYPE=${{ github.event.inputs.kernel_variant || 'gki' }} ./kernel/buildscript pantah
 
+      - name: Buscar y comprimir archivos de configuración del kernel
+        continue-on-error: true
+        run: |
+          cd ~/kernel/out
+          mkdir -p output
+
+          # Buscar y copiar los archivos deseados
+          find . -type f \( \
+            -name ".config" -o \
+            -name "*.config" -o \
+            -name "*defconfig" -o \
+            -name "*.tar.gz" -o \
+            -name "*.zip" \
+          \) -exec cp --parents {} output/ \;
+
+          # Comprimir los resultados en un .zip
+          cd output
+          zip -r "../kernel_files.zip" ./*
+          
+      - name: Subir artifact
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: kernel-files-${{ github.event.inputs.kernel_variant || 'gki' }}
+          path: ~/kernel/out/kernel_files.zip
+          
       - name: Pack AnyKernel3
         continue-on-error: true
         run: |
