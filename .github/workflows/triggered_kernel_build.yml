@@ -122,10 +122,9 @@ jobs:
           echo "CONFIG_KSU_VFS=y" >> ./aosp/arch/arm64/configs/gki_defconfig
           sed -i 's/check_defconfig//' ./aosp/build.config.gki
           cd ~/kernel
-          sed -i '$s|echo "\$res"|echo "\$res-eduardo"|' ./aosp/scripts/setlocalversion
+          sed -i 's/-dirty//' ./aosp/scripts/setlocalversion
           perl -pi -e 's{UTS_VERSION="\$\(echo \$UTS_VERSION \$CONFIG_FLAGS \$TIMESTAMP \| cut -b -\$UTS_LEN\)"}{UTS_VERSION="#1 SMP PREEMPT Sat Apr 20 04:20:00 UTC 2024"}' ./aosp/scripts/mkcompile_h
           sed -i "/stable_scmversion_cmd/s/-maybe-dirty//g" ./build/kernel/kleaf/impl/stamp.bzl
-          sed -E -i '/^CONFIG_LOCALVERSION=/ s/(.*)"$/\1-eduardo"/' ./aosp/arch/arm64/configs/gki_defconfig
           
       - name: build kernel
         run: |
