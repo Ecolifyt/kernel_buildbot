@@ -64,11 +64,13 @@ jobs:
           rm android/abi_gki_protected_exports_*
           cd ~/kernel
           cp susfs4ksu/kernel_patches/50_add_susfs_in_gki-android14-6.1.patch ./aosp/
+          cp susfs4ksu/kernel_patches/next/next_hooks.patch ./aosp/
           cp susfs4ksu/kernel_patches/fs/* ./aosp/fs/
           cp susfs4ksu/kernel_patches/include/linux/* ./aosp/include/linux/
           cp kernel_patches/next/0001-kernel-patch-susfs-v1.5.5-to-KernelSU-Next-v1.0.5.patch ./aosp/KernelSU-Next
           cd ~/kernel/aosp
           patch -p1 < 50_add_susfs_in_gki-android14-6.1.patch || true
+          patch -p1 --fuzz=3 < ./next_hooks.patch || true
           cd ~/kernel/aosp/KernelSU-Next
           patch -p1 --forward < 0001-kernel-patch-susfs-v1.5.5-to-KernelSU-Next-v1.0.5.patch || true
           cd ..
