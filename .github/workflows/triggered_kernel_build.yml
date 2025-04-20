@@ -72,9 +72,9 @@ jobs:
           cd ~/kernel/aosp
           patch -p1 < 50_add_susfs_in_gki-android14-6.1.patch || true
           patch -p1 --fuzz=3 < next_hooks.patch || true
-          patch -p1 --fuzz=3 < sys.c_fix.patch || true
-          sed -i "s/poofed_size: '%u'/poofed_size: '%llu'/g" ./fs/susfs.c
-          sed -i "s/length of string: %u/length of string: %lu/g" ./fs/susfs.c
+          #patch -p1 --fuzz=3 < sys.c_fix.patch || true
+          #sed -i "s/poofed_size: '%u'/poofed_size: '%llu'/g" ./fs/susfs.c
+          #sed -i "s/length of string: %u/length of string: %lu/g" ./fs/susfs.c
           
           cd ~/kernel/aosp/KernelSU-Next
           patch -p1 --forward < 0001-kernel-patch-susfs-v1.5.5-to-KernelSU-Next-v1.0.5.patch || true
