@@ -64,19 +64,24 @@ jobs:
           rm android/abi_gki_protected_exports_*
           cd ~/kernel
           cp susfs4ksu/kernel_patches/50_add_susfs_in_gki-android14-6.1.patch ./aosp/
-          cp susfs4ksu/kernel_patches/next/next_hooks.patch ./aosp/
+          cp kernel_patches/next/next_hooks.patch ./aosp/
           cp susfs4ksu/kernel_patches/fs/* ./aosp/fs/
           cp susfs4ksu/kernel_patches/include/linux/* ./aosp/include/linux/
+          cp kernel_patches/sultan/sys.c_fix.patch ./aosp/
           cp kernel_patches/next/0001-kernel-patch-susfs-v1.5.5-to-KernelSU-Next-v1.0.5.patch ./aosp/KernelSU-Next
           cd ~/kernel/aosp
           patch -p1 < 50_add_susfs_in_gki-android14-6.1.patch || true
-          patch -p1 --fuzz=3 < ./next_hooks.patch || true
+          patch -p1 --fuzz=3 < next_hooks.patch || true
+          patch -p1 --fuzz=3 < sys.c_fix.patch || true
+          sed -i "s/poofed_size: '%u'/poofed_size: '%llu'/g" ./fs/susfs.c
+          sed -i "s/length of string: %u/length of string: %lu/g" ./fs/susfs.c
+          
           cd ~/kernel/aosp/KernelSU-Next
           patch -p1 --forward < 0001-kernel-patch-susfs-v1.5.5-to-KernelSU-Next-v1.0.5.patch || true
           cd ..
-          cp ../kernel_patches/next/syscall_hooks.patch ./ 
+          #cp ../kernel_patches/next/syscall_hooks.patch ./ 
           cp ../kernel_patches/69_hide_stuff.patch ./ 
-          patch -p1 -F 3 < syscall_hooks.patch
+          #patch -p1 -F 3 < syscall_hooks.patch
           patch -p1 -F 3 < 69_hide_stuff.patch
           cd ~/kernel
           echo "Adding configuration settings to gki_defconfig..."
@@ -91,7 +96,7 @@ jobs:
           echo "CONFIG_KSU_SUSFS_AUTO_ADD_SUS_KSU_DEFAULT_MOUNT=y" >> ./aosp/arch/arm64/configs/gki_defconfig
           echo "CONFIG_KSU_SUSFS_AUTO_ADD_SUS_BIND_MOUNT=y" >> ./aosp/arch/arm64/configs/gki_defconfig
           echo "CONFIG_KSU_SUSFS_SUS_KSTAT=y" >> ./aosp/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_KSU_SUSFS_SUS_OVERLAYFS=n" >> ./aosp/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KSU_SUSFS_SUS_OVERLAYFS=y" >> ./aosp/arch/arm64/configs/gki_defconfig
           echo "CONFIG_KSU_SUSFS_TRY_UMOUNT=y" >> ./aosp/arch/arm64/configs/gki_defconfig
           echo "CONFIG_KSU_SUSFS_AUTO_ADD_TRY_UMOUNT_FOR_BIND_MOUNT=y" >> ./aosp/arch/arm64/configs/gki_defconfig
           echo "CONFIG_KSU_SUSFS_SPOOF_UNAME=y" >> ./aosp/arch/arm64/configs/gki_defconfig
