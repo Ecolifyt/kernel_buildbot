@@ -1,0 +1,11 @@
+#!/bin/bash
+
+
+tg="gs201"
+
+# build kernel
+cd kernel
+BUILD_KERNEL=1 ./build_$tg.sh --config=no_download_gki_fips140 --config=no_download_gki --config=use_source_tree_aosp --kernel_package=@//aosp --lto=thin "${@:2}"
+cd .. # god damn it gh
+
+exit 0
