@@ -87,11 +87,16 @@ jobs:
           cp susfs4ksu/kernel_patches/fs/* ./aosp/fs/
           cp susfs4ksu/kernel_patches/include/linux/* ./aosp/include/linux/
           cp SukiSU_patch/hooks/syscall_hooks.patch ./aosp/
+          cp -r SukiSU_patch/other/lz4k/include/linux/* ./aosp/include/linux
+          cp -r SukiSU_patch/other/lz4k/lib/* ./aosp/lib
+          cp -r SukiSU_patch/other/lz4k/crypto/* ./aosp/crypto
           cd ~/kernel/aosp
           cp ../SukiSU_patch/69_hide_stuff.patch ./ 
-          patch -p1 < 50_add_susfs_in_gki-android14-6.1.patch || true
-          patch -p1 -F 3 < syscall_hooks.patch
+          patch -p1 < 50_add_susfs_in_gki-android14-6.1.patch
           patch -p1 -F 3 < 69_hide_stuff.patch
+          patch -p1 -F 3 < syscall_hooks.patch
+          patch -p1 -F 3 < lz4kd.patch || true
+          
           cd ~/kernel
           echo "Adding configuration settings to gki_defconfig..."
           # Add KSU configuration settings
@@ -124,10 +129,18 @@ jobs:
           echo "CONFIG_IP_NF_TARGET_TTL=y" >> ./aosp/arch/arm64/configs/gki_defconfig
           echo "CONFIG_IP6_NF_TARGET_HL=y" >> ./aosp/arch/arm64/configs/gki_defconfig
           echo "CONFIG_IP6_NF_MATCH_HL=y" >> ./aosp/arch/arm64/configs/gki_defconfig
-          
+          sed -i 's/CONFIG_MODULE_SIG=y/CONFIG_MODULE_SIG=n/g' ./aosp/arch/arm64/configs/gki_defconfig
+          sed -i 's/CONFIG_ZSMALLOC=m/CONFIG_ZSMALLOC=y/g' ./aosp/arch/arm64/configs/gki_defconfig
+          sed -i 's/CONFIG_ZRAM=m/CONFIG_ZRAM=y/g' ./aosp/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_CRYPTO_LZ4HC=y" >> ./aosp/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_CRYPTO_LZ4K=y" >> ./aosp/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_CRYPTO_LZ4KD=y" >> ./aosp/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_CRYPTO_842=y" >> ./aosp/arch/arm64/configs/gki_defconfig
           sed -i 's/check_defconfig//' ./aosp/build.config.gki
           cd ~/kernel
-          
+          sed -i 's/ -dirty//g' ./aosp/scripts/setlocalversion
+          sed -i 's/ -dirty//g' ./external/dtc/scripts/setlocalversion
+          sed -i '$i res=$(echo "$res" | sed '\''s/-dirty//g'\'')' ./aosp/scripts/setlocalversion
           sed -i '$s|echo "\$res"|echo "\$res"|' ./aosp/scripts/setlocalversion
           perl -pi -e 's{UTS_VERSION="\$\(echo \$UTS_VERSION \$CONFIG_FLAGS \$TIMESTAMP \| cut -b -\$UTS_LEN\)"}{UTS_VERSION="#1 SMP PREEMPT Sat Apr 20 04:20:00 UTC 2024"}' ./aosp/scripts/mkcompile_h
           sed -i "/stable_scmversion_cmd/s/-maybe-dirty//g" ./build/kernel/kleaf/impl/stamp.bzl
@@ -138,7 +151,7 @@ jobs:
             cd "$CURRENT_DIR"
             tools/bazel run \
               --kernel_package=@//aosp \
-              --config=fast \
+              --config=stamp \
               --config=pantah \
               //private/devices/google/pantah:gs201_pantah_dist \
               --config=no_download_gki_fips140 \
