@@ -49,11 +49,11 @@ jobs:
           tree -a > estructura.txt
           
           if [ ! -z "$BOOT_SIGN_KEY" ]; then
-            echo "$BOOT_SIGN_KEY" > ./build-tools/linux-x86/share/avb/testkey_rsa2048.pem
-            echo "BOOT_SIGN_KEY_PATH=$GITHUB_WORKSPACE/build-tools/linux-x86/share/avb/testkey_rsa2048.pem" >> $GITHUB_ENV
+            echo "$BOOT_SIGN_KEY" > ./prebuilts/kernel-build-tools/linux-x86/share/avb/testkey_rsa2048.pem
+            echo "BOOT_SIGN_KEY_PATH=$GITHUB_WORKSPACE/kernel/prebuilts/kernel-build-tools/linux-x86/share/avb/testkey_rsa2048.pem" >> $GITHUB_ENV
           else
-            openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 > ./build-tools/linux-x86/share/avb/testkey_rsa2048.pem
-            echo "BOOT_SIGN_KEY_PATH=$GITHUB_WORKSPACE/build-tools/linux-x86/share/avb/testkey_rsa2048.pem" >> $GITHUB_ENV
+            openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 > ./prebuilts/kernel-build-tools/linux-x86/share/avb/testkey_rsa2048.pem
+            echo "BOOT_SIGN_KEY_PATH=$GITHUB_WORKSPACE/kernel/prebuilts/kernel-build-tools/linux-x86/share/avb/testkey_rsa2048.pem" >> $GITHUB_ENV
           fi
           
       - name: Subir tree list
