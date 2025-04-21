@@ -80,7 +80,6 @@ jobs:
         run: |
           cd ~
           cd kernel/aosp
-          cp "$BOOT_SIGN_KEY_PATH" ./certs/signing_key.pem
           curl -LSs "https://raw.githubusercontent.com/ShirkNeko/SukiSU-Ultra/main/kernel/setup.sh" | bash -s susfs-stable
           rm android/abi_gki_protected_exports_*
           cd ~/kernel
@@ -131,6 +130,7 @@ jobs:
           echo "CONFIG_IP_NF_TARGET_TTL=y" >> ./aosp/arch/arm64/configs/gki_defconfig
           echo "CONFIG_IP6_NF_TARGET_HL=y" >> ./aosp/arch/arm64/configs/gki_defconfig
           echo "CONFIG_IP6_NF_MATCH_HL=y" >> ./aosp/arch/arm64/configs/gki_defconfig
+          #echo "CONFIG_MODULE_SIG_KEY="certs/signing_key.pem"" >> /aosp/arch/arm64/configs/gki_defconfig
           sed -i 's/CONFIG_MODULE_SIG=y/CONFIG_MODULE_SIG=n/g' ./aosp/arch/arm64/configs/gki_defconfig
           sed -i 's/CONFIG_ZSMALLOC=m/CONFIG_ZSMALLOC=y/g' ./aosp/arch/arm64/configs/gki_defconfig
           sed -i 's/CONFIG_ZRAM=m/CONFIG_ZRAM=y/g' ./aosp/arch/arm64/configs/gki_defconfig
@@ -153,12 +153,11 @@ jobs:
             cd "$CURRENT_DIR"
             tools/bazel run \
               --kernel_package=@//aosp \
-              --config=stamp \
+              --config=local \
               --config=pantah \
               //private/devices/google/pantah:gs201_pantah_dist \
               --config=no_download_gki_fips140 \
               --config=no_download_gki \
-              --config=use_source_tree_aosp \
               --lto=thin \
               "${@}"
 
