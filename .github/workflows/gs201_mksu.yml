@@ -143,7 +143,6 @@ jobs:
           cd ~/kernel
           tools/bazel run --config=fast --config=pantah  //private/devices/google/pantah:gs201_pantah_dist --config=no_download_gki_fips140 --config=no_download_gki --config=use_source_tree_aosp --kernel_package=@//aosp --lto=thin
 
-
           
       - name: Pack AnyKernel3
         continue-on-error: true
