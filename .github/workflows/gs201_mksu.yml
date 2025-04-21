@@ -137,7 +137,7 @@ jobs:
             set -e
             set -x
             cd "$CURRENT_DIR"
-            tools/bazel run \
+            tools/bazel build \
               --kernel_package=@//aosp \
               --config=local \
               --config=stamp \
