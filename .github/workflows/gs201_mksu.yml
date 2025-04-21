@@ -79,7 +79,7 @@ jobs:
         run: |
           cd ~
           cd kernel/aosp
-          curl -LSs "https://raw.githubusercontent.com/ShirkNeko/SukiSU-Ultra/main/kernel/setup.sh" | bash -s susfs-dev
+          curl -LSs "https://raw.githubusercontent.com/ShirkNeko/SukiSU-Ultra/main/kernel/setup.sh" | bash -s susfs-stable
           rm android/abi_gki_protected_exports_*
           cd ~/kernel
           cp susfs4ksu/kernel_patches/50_add_susfs_in_gki-android14-6.1.patch ./aosp/
@@ -139,8 +139,7 @@ jobs:
             cd "$CURRENT_DIR"
             tools/bazel build \
               --kernel_package=@//aosp \
-              --config=local \
-              --config=stamp \
+              --config=fast \
               --config=pantah \
               --config=no_download_gki_fips140 \
               --config=no_download_gki \
