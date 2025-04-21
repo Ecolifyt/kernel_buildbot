@@ -137,16 +137,15 @@ jobs:
             set -e
             set -x
             cd "$CURRENT_DIR"
-            tools/bazel build \
+            tools/bazel run \
               --kernel_package=@//aosp \
               --config=local \
+              --config=stamp \
               --config=pantah \
               --config=no_download_gki_fips140 \
               --config=no_download_gki \
               --lto=thin \
-              //private/devices/google/pantah:gs201_pantah_dist \
-              -- \
-              --destdir=out/pantah/dist || exit 1
+              //private/devices/google/pantah:gs201_pantah_dist  || exit 1
       
       - name: Patch Image File A14 & A15
         continue-on-error: true
