@@ -46,9 +46,9 @@ jobs:
         continue-on-error: true
         run: |
           echo "La ruta actual es: $CURRENT_DIR"
-          echo "AVBTOOL=$CURRENT_DIR/prebuilts/build-tools/linux-x86/bin/avbtool" >> $GITHUB_ENV
-          echo "MKBOOTIMG=$CURRENT_DIR/platform/prebuilts/build-tools/mkbootimg/mkbootimg.py" >> $GITHUB_ENV
-          echo "UNPACK_BOOTIMG=$CURRENT_DIR/platform/prebuilts/build-tools/mkbootimg/unpack_bootimg.py" >> $GITHUB_ENV
+          echo "AVBTOOL=$CURRENT_DIR/prebuilts/kernel-build-tools/linux-x86/bin/avbtool" >> $GITHUB_ENV
+          echo "MKBOOTIMG=$CURRENT_DIR/tools/mkbootimg/mkbootimg.py" >> $GITHUB_ENV
+          echo "UNPACK_BOOTIMG=$CURRENT_DIR/tools/mkbootimg/unpack_bootimg.py" >> $GITHUB_ENV
           
       - name: Set boot sign key
         continue-on-error: true
@@ -57,11 +57,11 @@ jobs:
         run: |
           echo "La ruta actual es: $CURRENT_DIR"
           if [ ! -z "$BOOT_SIGN_KEY" ]; then
-            echo "$BOOT_SIGN_KEY" > "$CURRENT_DIR/prebuilts/build-tools/linux-x86/share/avb/testkey_rsa2048.pem"
-            echo "BOOT_SIGN_KEY_PATH=$CURRENT_DIR/prebuilts/build-tools/linux-x86/share/avb/testkey_rsa2048.pem" >> $GITHUB_ENV
+            echo "$BOOT_SIGN_KEY" > "$CURRENT_DIR/prebuilts/kernel-build-tools/linux-x86/share/avb/testkey_rsa2048.pem"
+            echo "BOOT_SIGN_KEY_PATH=$CURRENT_DIR/prebuilts/kernel-build-tools/linux-x86/share/avb/testkey_rsa2048.pem" >> $GITHUB_ENV
           else
-            openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 > "$CURRENT_DIR/prebuilts/build-tools/linux-x86/share/avb/testkey_rsa2048.pem"
-            echo "BOOT_SIGN_KEY_PATH=$CURRENT_DIR/prebuilts/build-tools/linux-x86/share/avb/testkey_rsa2048.pem" >> $GITHUB_ENV
+            openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 > "$CURRENT_DIR/prebuilts/kernel-build-tools/linux-x86/share/avb/testkey_rsa2048.pem"
+            echo "BOOT_SIGN_KEY_PATH=$CURRENT_DIR/prebuilts/kernel-build-tools/linux-x86/share/avb/testkey_rsa2048.pem" >> $GITHUB_ENV
           fi
         
           
