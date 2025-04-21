@@ -50,21 +50,6 @@ jobs:
           echo "MKBOOTIMG=$CURRENT_DIR/tools/mkbootimg/mkbootimg.py" >> $GITHUB_ENV
           echo "UNPACK_BOOTIMG=$CURRENT_DIR/tools/mkbootimg/unpack_bootimg.py" >> $GITHUB_ENV
           
-      - name: Set boot sign key
-        continue-on-error: true
-        env:
-          BOOT_SIGN_KEY: ${{ secrets.BOOT_SIGN_KEY }}
-        run: |
-          echo "La ruta actual es: $CURRENT_DIR"
-          if [ ! -z "$BOOT_SIGN_KEY" ]; then
-            echo "$BOOT_SIGN_KEY" > "$CURRENT_DIR/prebuilts/kernel-build-tools/linux-x86/share/avb/testkey_rsa2048.pem"
-            echo "BOOT_SIGN_KEY_PATH=$CURRENT_DIR/prebuilts/kernel-build-tools/linux-x86/share/avb/testkey_rsa2048.pem" >> $GITHUB_ENV
-          else
-            openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 > "$CURRENT_DIR/prebuilts/kernel-build-tools/linux-x86/share/avb/testkey_rsa2048.pem"
-            echo "BOOT_SIGN_KEY_PATH=$CURRENT_DIR/prebuilts/kernel-build-tools/linux-x86/share/avb/testkey_rsa2048.pem" >> $GITHUB_ENV
-          fi
-        
-          
       # KSU specific steps
       - name: clone wild kernel patches + susfs4ksu
         if: github.event.inputs.kernel_variant == 'gki-ksunext' || contains(github.ref, 'gki_ksu')
@@ -80,9 +65,6 @@ jobs:
         run: |
           cd ~
           cd kernel/aosp
-          openssl req -new -nodes -utf8 -sha256 -days 36500 -batch -x509 \
-             -config certs/default.x509.genkey -outform PEM \
-             -out certs/signing_key.pem -keyout certs/signing_key.pem
           curl -LSs "https://raw.githubusercontent.com/ShirkNeko/SukiSU-Ultra/main/kernel/setup.sh" | bash -s susfs-stable
           rm android/abi_gki_protected_exports_*
           cd ~/kernel
@@ -137,6 +119,8 @@ jobs:
           sed -i 's/CONFIG_MODULE_SIG=y/CONFIG_MODULE_SIG=n/g' ./aosp/arch/arm64/configs/gki_defconfig
           sed -i 's/CONFIG_ZSMALLOC=m/CONFIG_ZSMALLOC=y/g' ./aosp/arch/arm64/configs/gki_defconfig
           sed -i 's/CONFIG_ZRAM=m/CONFIG_ZRAM=y/g' ./aosp/arch/arm64/configs/gki_defconfig
+          sed -i 's/CONFIG_MODULE_SIG_PROTECT=y/CONFIG_MODULE_SIG_PROTECT=n/g' ./aosp/arch/arm64/configs/gki_defconfig
+          
           echo "CONFIG_CRYPTO_LZ4HC=y" >> ./aosp/arch/arm64/configs/gki_defconfig
           echo "CONFIG_CRYPTO_LZ4K=y" >> ./aosp/arch/arm64/configs/gki_defconfig
           echo "CONFIG_CRYPTO_LZ4KD=y" >> ./aosp/arch/arm64/configs/gki_defconfig
@@ -156,7 +140,7 @@ jobs:
             cd "$CURRENT_DIR"
             tools/bazel run \
               --kernel_package=@//aosp \
-              --config=local \
+              --config=stamp \
               --config=pantah \
               //private/devices/google/pantah:gs201_pantah_dist \
               --config=no_download_gki_fips140 \
