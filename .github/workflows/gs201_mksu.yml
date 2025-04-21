@@ -44,6 +44,7 @@ jobs:
       - name: Set environment variables
         continue-on-error: true
         run: |
+          cd ~
           echo "AVBTOOL=$GITHUB_WORKSPACE/kernel/prebuilts/build-tools/linux-x86/bin/avbtool" >> $GITHUB_ENV
           echo "MKBOOTIMG=$GITHUB_WORKSPACE/kernel/platform/prebuilts/build-tools/mkbootimg/mkbootimg.py" >> $GITHUB_ENV
           echo "UNPACK_BOOTIMG=$GITHUB_WORKSPACE/kernel/platform/prebuilts/build-tools/mkbootimg/unpack_bootimg.py" >> $GITHUB_ENV
@@ -53,11 +54,12 @@ jobs:
         env:
           BOOT_SIGN_KEY: ${{ secrets.BOOT_SIGN_KEY }}
         run: |
+          cd ~
           if [ ! -z "$BOOT_SIGN_KEY" ]; then
-            echo "$BOOT_SIGN_KEY" > "$GITHUB_WORKSPACE/kernel/prebuilts/build-tools/linux-x86/share/avb/testkey_rsa2048.pem"
+            echo "$BOOT_SIGN_KEY" > ./kernel/prebuilts/build-tools/linux-x86/share/avb/testkey_rsa2048.pem
             echo "BOOT_SIGN_KEY_PATH=$GITHUB_WORKSPACE/kernel/prebuilts/build-tools/linux-x86/share/avb/testkey_rsa2048.pem" >> $GITHUB_ENV
           else
-            openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 > "$GITHUB_WORKSPACE/kernel/prebuilts/build-tools/linux-x86/share/avb/testkey_rsa2048.pem"
+            openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 > ./kernel/prebuilts/build-tools/linux-x86/share/avb/testkey_rsa2048.pem
             echo "BOOT_SIGN_KEY_PATH=$GITHUB_WORKSPACE/kernel/prebuilts/build-tools/linux-x86/share/avb/testkey_rsa2048.pem" >> $GITHUB_ENV
           fi
           
