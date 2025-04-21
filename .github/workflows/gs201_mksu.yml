@@ -54,10 +54,10 @@ jobs:
           BOOT_SIGN_KEY: ${{ secrets.BOOT_SIGN_KEY }}
         run: |
           if [ ! -z "$BOOT_SIGN_KEY" ]; then
-            echo "$BOOT_SIGN_KEY" > ~/kernel/prebuilts/build-tools/linux-x86/share/avb/testkey_rsa2048.pem
+            echo "$BOOT_SIGN_KEY" > "$GITHUB_WORKSPACE/kernel/prebuilts/build-tools/linux-x86/share/avb/testkey_rsa2048.pem"
             echo "BOOT_SIGN_KEY_PATH=$GITHUB_WORKSPACE/kernel/prebuilts/build-tools/linux-x86/share/avb/testkey_rsa2048.pem" >> $GITHUB_ENV
           else
-            openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 > ~/kernel/prebuilts/build-tools/linux-x86/share/avb/testkey_rsa2048.pem
+            openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 > "$GITHUB_WORKSPACE/kernel/prebuilts/build-tools/linux-x86/share/avb/testkey_rsa2048.pem"
             echo "BOOT_SIGN_KEY_PATH=$GITHUB_WORKSPACE/kernel/prebuilts/build-tools/linux-x86/share/avb/testkey_rsa2048.pem" >> $GITHUB_ENV
           fi
           
