@@ -132,18 +132,20 @@ jobs:
           sed -i "/stable_scmversion_cmd/s/-maybe-dirty//g" ./build/kernel/kleaf/impl/stamp.bzl
           sed -E -i '/^CONFIG_LOCALVERSION=/ s/(.*)"$/\1"/' ./aosp/arch/arm64/configs/gki_defconfig
           
-      - name: Build with retry
-        uses: nick-fields/retry@v3
-        with:
-          timeout_minutes: 30
-          max_attempts: 3
-          retry_on: timeout
-          commands: |
+      - name: Build Kernel
+        run: |
             set -e
             set -x
-            cd ~/kernel
-            tools/bazel build --kernel_package=@//aosp --config=fast --config=pantah  //private/devices/google/pantah:gs201_pantah_dist --config=no_download_gki_fips140 --config=no_download_gki --lto=thin
-
+            cd "$CURRENT_DIR"
+            tools/bazel build \
+              --kernel_package=@//aosp \
+              --config=fast \
+              --config=pantah \
+              --config=no_download_gki_fips140 \
+              --config=no_download_gki \
+              --lto=thin \
+              //private/devices/google/pantah:gs201_pantah_dist
+      
       - name: Patch Image File A14 & A15
         continue-on-error: true
         run: |
