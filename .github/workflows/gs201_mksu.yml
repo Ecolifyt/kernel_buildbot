@@ -37,24 +37,16 @@ jobs:
           mkdir kernel
           cp buildscript kernel
           cd kernel
-          repo init -u https://github.com/EduardoA3677/android-gs-pantah-6.1-android15-qpr2 --depth 1
+          repo init -u https://android.googlesource.com/kernel/manifest -b android-gs-pantah-6.1-android15-qpr2-beta --depth 1
           repo sync -c -j6 --no-tags --no-clone-bundle --force-sync
-
-      - name: checkout android14-6.1-lts
-        run: |
-          cd ~/kernel
-          rm -rf aosp/
-          git clone https://android.googlesource.com/kernel/common -b android14-6.1-lts --depth=1 aosp
           
       # KSU specific steps
       - name: clone wild kernel patches + susfs4ksu
         if: github.event.inputs.kernel_variant == 'gki-ksunext' || contains(github.ref, 'gki_ksu')
         run: |
-          git clone https://github.com/WildPlusKernel/kernel_patches.git
           git clone https://gitlab.com/simonpunk/susfs4ksu.git -b gki-android14-6.1
           git clone https://github.com/Testady/SukiSU_patch.git
           mv SukiSU_patch ~/kernel
-          mv kernel_patches ~/kernel
           mv susfs4ksu ~/kernel
 
       - name: patch kernel ksunext susfs
@@ -68,19 +60,11 @@ jobs:
           cp susfs4ksu/kernel_patches/50_add_susfs_in_gki-android14-6.1.patch ./aosp/
           cp susfs4ksu/kernel_patches/fs/* ./aosp/fs/
           cp susfs4ksu/kernel_patches/include/linux/* ./aosp/include/linux/
-          cp kernel_patches/next/0001-kernel-patch-susfs-v1.5.5-to-KernelSU-Next-v1.0.5.patch ./aosp/KernelSU-Next
           cp SukiSU_patch/hooks/syscall_hooks.patch ./aosp/
           cd ~/kernel/aosp
-          patch -p1 < 50_add_susfs_in_gki-android14-6.1.patch || true
-          patch -p1 -F 3 < syscall_hooks.patch || true 
-          #patch -p1 --fuzz=3 < sys.c_fix.patch || true
-          #sed -i "s/poofed_size: '%u'/poofed_size: '%llu'/g" ./fs/susfs.c
-          #sed -i "s/length of string: %u/length of string: %lu/g" ./fs/susfs.c
-          
-          #cd ~/kernel/aosp/KernelSU-Next
-          #cp ../kernel_patches/next/syscall_hooks.patch ./ 
           cp ../SukiSU_patch/69_hide_stuff.patch ./ 
-          #patch -p1 -F 3 < syscall_hooks.patch
+          patch -p1 < 50_add_susfs_in_gki-android14-6.1.patch || true
+          patch -p1 -F 3 < syscall_hooks.patch
           patch -p1 -F 3 < 69_hide_stuff.patch
           cd ~/kernel
           echo "Adding configuration settings to gki_defconfig..."
@@ -114,24 +98,14 @@ jobs:
           echo "CONFIG_IP_NF_TARGET_TTL=y" >> ./aosp/arch/arm64/configs/gki_defconfig
           echo "CONFIG_IP6_NF_TARGET_HL=y" >> ./aosp/arch/arm64/configs/gki_defconfig
           echo "CONFIG_IP6_NF_MATCH_HL=y" >> ./aosp/arch/arm64/configs/gki_defconfig
-          #echo "CONFIG_TCP_CONG_ADVANCED=y" >> ./aosp/arch/arm64/configs/gki_defconfig 
-          #echo "CONFIG_TCP_CONG_BBR=y" >> ./aosp/arch/arm64/configs/gki_defconfig
-          #echo "CONFIG_NET_SCH_FQ=y" >> ./aosp/arch/arm64/configs/gki_defconfig
-          #echo "CONFIG_TCP_CONG_BIC=n" >> ./aosp/arch/arm64/configs/gki_defconfig
-          #echo "CONFIG_TCP_CONG_WESTWOOD=n" >> ./aosp/arch/arm64/configs/gki_defconfig
-          #echo "CONFIG_TCP_CONG_HTCP=n" >> ./aosp/arch/arm64/configs/gki_defconfig 
-          sed -i 's/CONFIG_LTO=n/CONFIG_LTO=y/' "./aosp/arch/arm64/configs/gki_defconfig"
-          sed -i 's/CONFIG_LTO_CLANG_FULL=y/CONFIG_LTO_CLANG_THIN=y/' "./aosp/arch/arm64/configs/gki_defconfig"
-          sed -i 's/CONFIG_LTO_CLANG_NONE=y/CONFIG_LTO_CLANG_THIN=y/' "./aosp/arch/arm64/configs/gki_defconfig"
           
-
           sed -i 's/check_defconfig//' ./aosp/build.config.gki
           cd ~/kernel
+          
           sed -i '$s|echo "\$res"|echo "\$res"|' ./aosp/scripts/setlocalversion
           perl -pi -e 's{UTS_VERSION="\$\(echo \$UTS_VERSION \$CONFIG_FLAGS \$TIMESTAMP \| cut -b -\$UTS_LEN\)"}{UTS_VERSION="#1 SMP PREEMPT Sat Apr 20 04:20:00 UTC 2024"}' ./aosp/scripts/mkcompile_h
           sed -i "/stable_scmversion_cmd/s/-maybe-dirty//g" ./build/kernel/kleaf/impl/stamp.bzl
           sed -E -i '/^CONFIG_LOCALVERSION=/ s/(.*)"$/\1"/' ./aosp/arch/arm64/configs/gki_defconfig
-          sed -i 's/-dirty//' ./aosp/scripts/setlocalversion
           
       - name: build kernel
         run: |
@@ -162,7 +136,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: kernel-dist-${{ github.event.inputs.kernel_variant || 'gki' }}
-          path: |
+          path:|
             ~/kernel/GS201_Android14_6.1_mksu.zip
             ~/kernel/GS201_Android14_6.1_mksu_GZ.zip
             ~/kernel/GS201_Android14_6.1_mksu_lz4.zip
