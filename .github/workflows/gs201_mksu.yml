@@ -80,6 +80,7 @@ jobs:
         run: |
           cd ~
           cd kernel/aosp
+          cp "$BOOT_SIGN_KEY_PATH" ./certs/signing_key.pem
           curl -LSs "https://raw.githubusercontent.com/ShirkNeko/SukiSU-Ultra/main/kernel/setup.sh" | bash -s susfs-stable
           rm android/abi_gki_protected_exports_*
           cd ~/kernel
