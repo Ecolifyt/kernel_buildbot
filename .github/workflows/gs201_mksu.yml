@@ -39,7 +39,15 @@ jobs:
           cd kernel
           repo init -u https://android.googlesource.com/kernel/manifest -b android-gs-pantah-6.1-android15-qpr2-beta --depth 1
           repo sync -c -j6 --no-tags --no-clone-bundle --force-sync
+
      
+      - name: Set environment variables
+        continue-on-error: true
+        run: |
+          echo "AVBTOOL=$GITHUB_WORKSPACE/kernel/prebuilts/build-tools/linux-x86/bin/avbtool" >> $GITHUB_ENV
+          echo "MKBOOTIMG=$GITHUB_WORKSPACE/kernel/platform/prebuilts/build-tools/mkbootimg/mkbootimg.py" >> $GITHUB_ENV
+          echo "UNPACK_BOOTIMG=$GITHUB_WORKSPACE/kernel/platform/prebuilts/build-tools/mkbootimg/unpack_bootimg.py" >> $GITHUB_ENV
+          
       - name: Set boot sign key
         continue-on-error: true
         env:
@@ -49,11 +57,11 @@ jobs:
           tree -a > estructura.txt
           
           if [ ! -z "$BOOT_SIGN_KEY" ]; then
-            echo "$BOOT_SIGN_KEY" > ./prebuilts/kernel-build-tools/linux-x86/share/avb/testkey_rsa2048.pem
-            echo "BOOT_SIGN_KEY_PATH=$GITHUB_WORKSPACE/kernel/prebuilts/kernel-build-tools/linux-x86/share/avb/testkey_rsa2048.pem" >> $GITHUB_ENV
+            echo "$BOOT_SIGN_KEY" > ./prebuilts/build-tools/linux-x86/share/avb/testkey_rsa2048.pem
+            echo "BOOT_SIGN_KEY_PATH=$GITHUB_WORKSPACE/kernel/prebuilts/build-tools/linux-x86/share/avb/testkey_rsa2048.pem" >> $GITHUB_ENV
           else
-            openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 > ./prebuilts/kernel-build-tools/linux-x86/share/avb/testkey_rsa2048.pem
-            echo "BOOT_SIGN_KEY_PATH=$GITHUB_WORKSPACE/kernel/prebuilts/kernel-build-tools/linux-x86/share/avb/testkey_rsa2048.pem" >> $GITHUB_ENV
+            openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 > ./prebuilts/build-tools/linux-x86/share/avb/testkey_rsa2048.pem
+            echo "BOOT_SIGN_KEY_PATH=$GITHUB_WORKSPACE/kernel/prebuilts/build-tools/linux-x86/share/avb/testkey_rsa2048.pem" >> $GITHUB_ENV
           fi
           
       - name: Subir tree list
