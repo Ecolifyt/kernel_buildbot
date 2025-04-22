@@ -116,10 +116,10 @@ jobs:
           echo "CONFIG_IP6_NF_TARGET_HL=y" >> ./aosp/arch/arm64/configs/gki_defconfig
           echo "CONFIG_IP6_NF_MATCH_HL=y" >> ./aosp/arch/arm64/configs/gki_defconfig
           #echo "CONFIG_MODULE_SIG_KEY="certs/signing_key.pem"" >> /aosp/arch/arm64/configs/gki_defconfig
-          sed -i 's/CONFIG_MODULE_SIG=y/CONFIG_MODULE_SIG=n/g' ./aosp/arch/arm64/configs/gki_defconfig
+          #sed -i 's/CONFIG_MODULE_SIG=y/CONFIG_MODULE_SIG=n/g' ./aosp/arch/arm64/configs/gki_defconfig
           sed -i 's/CONFIG_ZSMALLOC=m/CONFIG_ZSMALLOC=y/g' ./aosp/arch/arm64/configs/gki_defconfig
           sed -i 's/CONFIG_ZRAM=m/CONFIG_ZRAM=y/g' ./aosp/arch/arm64/configs/gki_defconfig
-          sed -i 's/CONFIG_MODULE_SIG_PROTECT=y/CONFIG_MODULE_SIG_PROTECT=n/g' ./aosp/arch/arm64/configs/gki_defconfig
+          #sed -i 's/CONFIG_MODULE_SIG_PROTECT=y/CONFIG_MODULE_SIG_PROTECT=n/g' ./aosp/arch/arm64/configs/gki_defconfig
           
           echo "CONFIG_CRYPTO_LZ4HC=y" >> ./aosp/arch/arm64/configs/gki_defconfig
           echo "CONFIG_CRYPTO_LZ4K=y" >> ./aosp/arch/arm64/configs/gki_defconfig
