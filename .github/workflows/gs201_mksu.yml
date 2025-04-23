@@ -14,6 +14,11 @@ on:
 jobs:
   build_kernel:
     runs-on: ubuntu-22.04
+    env:
+      CCACHE_COMPILERCHECK: "%compiler% -dumpmachine; %compiler% -dumpversion"
+      CCACHE_NOHASHDIR: "true"
+      CCACHE_HARDLINK: "true"
+      
     steps:
       - name: Maximize build space
         uses: easimon/maximize-build-space@master
@@ -26,6 +31,16 @@ jobs:
           remove-haskell: 'true'
           remove-codeql: 'true'
           
+      - name: Set CONFIG Environment Variable
+        run: |
+          # Set CONFIG dynamically based on inputs values
+          CONFIG="android14-6.1-lts"
+
+          # Set CONFIG as an environment variable for future steps
+          echo "CONFIG=$CONFIG" >> $GITHUB_ENV
+
+          echo "CONFIG set to: $CONFIG"
+
       - name: checkout scripts
         uses: actions/checkout@v4
         with:
@@ -35,6 +50,31 @@ jobs:
         run: |
           ./pkginstall
 
+- name: Set up ccache
+        run: |
+          mkdir -p ~/.cache/bazel # Ensure the directory exists
+          ccache --version
+          ccache --max-size=2G
+          ccache --set-config=compression=true
+          echo "CCACHE_DIR=$HOME/.ccache" >> $GITHUB_ENV
+      
+      - name: Restore ccache from cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.ccache
+          key: android14-6.1-lts-ccache-${{ github.sha }}
+          restore-keys: |
+            android14-6.1-lts-ccache-
+      
+      - name: Cache toolchain
+        id: cache-toolchain
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/kernel/prebuilts/kernel-build-tools
+            ~/kernel/tools/mkbootimg/
+          key: toolchain-${{ runner.os }}-v1
+          
       - name: init credentials
         run: |   
           cd ~      
@@ -137,8 +177,11 @@ jobs:
           
       - name: Build Kernel
         run: |
+            set -e
+            set -x
             cd "$CURRENT_DIR"
             tools/bazel run \
+              --disk_cache=/home/runner/.cache/bazel \
               --kernel_package=@//aosp \
               --config=local \
               --lto=none \
@@ -147,6 +190,7 @@ jobs:
               --config=no_download_gki_fips140 \
               --config=no_download_gki \
               "${@}"
+            ccache --show-stats
 
       - name: Pack AnyKernel3
         continue-on-error: true
