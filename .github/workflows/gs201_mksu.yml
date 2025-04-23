@@ -204,7 +204,6 @@ jobs:
             -name "*dtb" -o \
             -name "*dtbo" -o \
             -name "*gz" \
-            
           \) -exec cp --parents {} output/ \;
 
           # Comprimir los resultados en un .zip
