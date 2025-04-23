@@ -56,8 +56,8 @@ jobs:
         run: |
           cd ~
           git clone https://gitlab.com/simonpunk/susfs4ksu.git -b gki-android14-6.1
-          git clone https://github.com/Testady/SukiSU_patch.git
-          mv SukiSU_patch ~/kernel
+          git clone https://github.com/WildPlusKernel/kernel_patches.git
+          mv kernel_patches ~/kernel
           mv susfs4ksu ~/kernel
 
       - name: patch kernel ksunext susfs
@@ -65,34 +65,33 @@ jobs:
         run: |
           cd ~
           cd kernel/aosp
-          curl -LSs "https://raw.githubusercontent.com/ShirkNeko/SukiSU-Ultra/main/kernel/setup.sh" | bash -s susfs-stable
+          curl -LSs "https://raw.githubusercontent.com/rifsxd/KernelSU-Next/next/kernel/setup.sh" | bash -s next
+          cd KernelSU-Next
+          KSU_VERSION=$(expr $(/usr/bin/git rev-list --count HEAD) "+" 10200)
+          echo "KSUVER=$KSU_VERSION" >> $GITHUB_ENV
+          sed -i "s/DKSU_VERSION=11998/DKSU_VERSION=${KSU_VERSION}/" kernel/Makefile
+          cd ..
           rm android/abi_gki_protected_exports_*
           cd ~/kernel
           cp susfs4ksu/kernel_patches/50_add_susfs_in_gki-android14-6.1.patch ./aosp/
           cp susfs4ksu/kernel_patches/fs/* ./aosp/fs/
           cp susfs4ksu/kernel_patches/include/linux/* ./aosp/include/linux/
-          cp SukiSU_patch/hooks/syscall_hooks.patch ./aosp/
-          cp SukiSU_patch/other/lz4k_patch/6.1/lz4kd.patch ./aosp/
-          cp -r SukiSU_patch/other/lz4k/include/linux/* ./aosp/include/linux
-          cp -r SukiSU_patch/other/lz4k/lib/* ./aosp/lib
-          cp -r SukiSU_patch/other/lz4k/crypto/* ./aosp/crypto
+          cp kernel_patches/next/0001-kernel-patch-susfs-v1.5.5-to-KernelSU-Next-v1.0.5.patch ./aosp/KernelSU-Next/
+          cp kernel_patches/next/syscall_hooks.patch ./aosp/
           cd ~/kernel/aosp
-          cp ../SukiSU_patch/69_hide_stuff.patch ./ 
+          cd ./KernelSU-Next
+          patch -p1 < 0001-kernel-patch-susfs-v1.5.5-to-KernelSU-Next-v1.0.5.patch || true
+          cd ..
+          cp ../kernel_patches/69_hide_stuff.patch ./ 
           patch -p1 < 50_add_susfs_in_gki-android14-6.1.patch
           patch -p1 -F 3 < 69_hide_stuff.patch
           patch -p1 -F 3 < syscall_hooks.patch
-          patch -p1 -F 3 < lz4kd.patch || true
           
           cd ~/kernel
           echo "Adding configuration settings to gki_defconfig..."
           # Add KSU configuration settings
           echo "CONFIG_KSU=y" >> ./aosp/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_KPM=y" >> ./aosp/arch/arm64/configs/gki_defconfig
-
-          echo "CONFIG_KSU_SUSFS_SUS_SU=n" >> ./aosp/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_KSU_MANUAL_HOOK=y" >> ./aosp/arch/arm64/configs/gki_defconfig
-          
-          # Add SUSFS configuration settings
+          echo "CONFIG_KSU_WITH_KPROBES=n" >> ./aosp/arch/arm64/configs/gki_defconfig
           echo "CONFIG_KSU_SUSFS=y" >> ./aosp/arch/arm64/configs/gki_defconfig
           echo "CONFIG_KSU_SUSFS_HAS_MAGIC_MOUNT=y" >> ./aosp/arch/arm64/configs/gki_defconfig
           echo "CONFIG_KSU_SUSFS_SUS_PATH=y" >> ./aosp/arch/arm64/configs/gki_defconfig
@@ -108,6 +107,8 @@ jobs:
           echo "CONFIG_KSU_SUSFS_HIDE_KSU_SUSFS_SYMBOLS=y" >> ./aosp/arch/arm64/configs/gki_defconfig
           echo "CONFIG_KSU_SUSFS_SPOOF_CMDLINE_OR_BOOTCONFIG=y" >> ./aosp/arch/arm64/configs/gki_defconfig
           echo "CONFIG_KSU_SUSFS_OPEN_REDIRECT=y" >> ./aosp/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KSU_SUSFS_SUS_SU=n" >> ./aosp/arch/arm64/configs/gki_defconfig
+
           # Add additional tmpfs config setting
           echo "CONFIG_TMPFS_XATTR=y" >> ./aosp/arch/arm64/configs/gki_defconfig
           echo "CONFIG_TMPFS_POSIX_ACL=y" >> ./aosp/arch/arm64/configs/gki_defconfig
@@ -115,20 +116,9 @@ jobs:
           echo "CONFIG_IP_NF_TARGET_TTL=y" >> ./aosp/arch/arm64/configs/gki_defconfig
           echo "CONFIG_IP6_NF_TARGET_HL=y" >> ./aosp/arch/arm64/configs/gki_defconfig
           echo "CONFIG_IP6_NF_MATCH_HL=y" >> ./aosp/arch/arm64/configs/gki_defconfig
-          #echo "CONFIG_MODULE_SIG_KEY="certs/signing_key.pem"" >> /aosp/arch/arm64/configs/gki_defconfig
-          #sed -i 's/CONFIG_MODULE_SIG=y/CONFIG_MODULE_SIG=n/g' ./aosp/arch/arm64/configs/gki_defconfig
-          sed -i 's/CONFIG_ZSMALLOC=m/CONFIG_ZSMALLOC=y/g' ./aosp/arch/arm64/configs/gki_defconfig
-          sed -i 's/CONFIG_ZRAM=m/CONFIG_ZRAM=y/g' ./aosp/arch/arm64/configs/gki_defconfig
-          #sed -i 's/CONFIG_MODULE_SIG_PROTECT=y/CONFIG_MODULE_SIG_PROTECT=n/g' ./aosp/arch/arm64/configs/gki_defconfig
           
-          echo "CONFIG_CRYPTO_LZ4HC=y" >> ./aosp/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_CRYPTO_LZ4K=y" >> ./aosp/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_CRYPTO_LZ4KD=y" >> ./aosp/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_CRYPTO_842=y" >> ./aosp/arch/arm64/configs/gki_defconfig
-          sed -i 's/check_defconfig//' ./aosp/build.config.gki
           cd ~/kernel
           sed -i 's/ -dirty//g' ./aosp/scripts/setlocalversion
-          #sed -i 's/ -dirty//g' ./external/dtc/scripts/setlocalversion
           sed -i '$i res=$(echo "$res" | sed '\''s/-dirty//g'\'')' ./aosp/scripts/setlocalversion
           sed -i '$s|echo "\$res"|echo "\$res"|' ./aosp/scripts/setlocalversion
           perl -pi -e 's{UTS_VERSION="\$\(echo \$UTS_VERSION \$CONFIG_FLAGS \$TIMESTAMP \| cut -b -\$UTS_LEN\)"}{UTS_VERSION="#1 SMP PREEMPT Sat Apr 20 04:20:00 UTC 2024"}' ./aosp/scripts/mkcompile_h
@@ -140,25 +130,13 @@ jobs:
             cd "$CURRENT_DIR"
             tools/bazel run \
               --kernel_package=@//aosp \
-              --config=stamp \
+              --config=fast \
               --config=pantah \
               //private/devices/google/pantah:gs201_pantah_dist \
               --config=no_download_gki_fips140 \
               --config=no_download_gki \
-              --lto=thin \
               "${@}"
 
-      - name: Patch Image File A14 & A15
-        continue-on-error: true
-        run: |
-            echo "Patching Image file..."
-            cd ~/kernel/out/pantah/dist/
-            curl -LSs "https://raw.githubusercontent.com/ShirkNeko/SukiSU_patch/refs/heads/main/kpm/patch_linux" -o patch
-            chmod 777 patch
-            ./patch
-            rm -rf Image
-            mv oImage Image
-            
       - name: Pack AnyKernel3
         continue-on-error: true
         run: |
