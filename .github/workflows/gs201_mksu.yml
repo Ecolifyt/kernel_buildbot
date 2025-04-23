@@ -46,7 +46,7 @@ jobs:
         run: |
           cd ~/kernel
           rm -rf aosp/
-          git clone https://github.com/EduardoA3677/kernel_common/tree/android14-6.1 -b android14-6.1 --depth=1 aosp
+          git clone https://github.com/EduardoA3677/kernel_common -b android14-6.1 --depth=1 aosp
           
       - name: Set environment variables
         continue-on-error: true
@@ -130,10 +130,6 @@ jobs:
           echo "CONFIG_TCP_CONG_HTCP=n" >> ./aosp/arch/arm64/configs/gki_defconfig
           cd ~/kernel
           sed -i 's/check_defconfig//' ./aosp/build.config.gki
-          sed -i 's/ -dirty//g' ./aosp/scripts/setlocalversion
-          sed -i '$i res=$(echo "$res" | sed '\''s/-dirty//g'\'')' ./aosp/scripts/setlocalversion
-          perl -pi -e 's{UTS_VERSION="\$\(echo \$UTS_VERSION \$CONFIG_FLAGS \$TIMESTAMP \| cut -b -\$UTS_LEN\)"}{UTS_VERSION="#1 SMP PREEMPT Sat Apr 20 04:20:00 UTC 2024"}' ./aosp/scripts/mkcompile_h
-          sed -E -i '/^CONFIG_LOCALVERSION=/ s/(.*)"$/\1"/' ./aosp/arch/arm64/configs/gki_defconfig
           
       - name: Build Kernel
         run: |
