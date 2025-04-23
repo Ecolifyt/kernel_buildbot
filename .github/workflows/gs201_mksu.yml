@@ -118,11 +118,10 @@ jobs:
           echo "CONFIG_IP6_NF_MATCH_HL=y" >> ./aosp/arch/arm64/configs/gki_defconfig
           
           cd ~/kernel
+          sed -i 's/check_defconfig//' ./aosp/build.config.gki
           sed -i 's/ -dirty//g' ./aosp/scripts/setlocalversion
           sed -i '$i res=$(echo "$res" | sed '\''s/-dirty//g'\'')' ./aosp/scripts/setlocalversion
-          sed -i '$s|echo "\$res"|echo "\$res"|' ./aosp/scripts/setlocalversion
           perl -pi -e 's{UTS_VERSION="\$\(echo \$UTS_VERSION \$CONFIG_FLAGS \$TIMESTAMP \| cut -b -\$UTS_LEN\)"}{UTS_VERSION="#1 SMP PREEMPT Sat Apr 20 04:20:00 UTC 2024"}' ./aosp/scripts/mkcompile_h
-          sed -i "/stable_scmversion_cmd/s/-maybe-dirty//g" ./build/kernel/kleaf/impl/stamp.bzl
           sed -E -i '/^CONFIG_LOCALVERSION=/ s/(.*)"$/\1"/' ./aosp/arch/arm64/configs/gki_defconfig
           
       - name: Build Kernel
