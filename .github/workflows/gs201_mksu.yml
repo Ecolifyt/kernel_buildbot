@@ -134,10 +134,10 @@ jobs:
       - name: Build Kernel
         run: |
             cd "$CURRENT_DIR"
-            tools/bazel build \
+            tools/bazel run \
               --kernel_package=@//aosp \
-              --kasan \
               --config=local \
+              --lto=none \
               --config=pantah \
               //private/devices/google/pantah:gs201_pantah_dist \
               --config=no_download_gki_fips140 \
