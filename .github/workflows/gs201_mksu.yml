@@ -137,11 +137,12 @@ jobs:
             tools/bazel run \
               --kernel_package=@//aosp \
               --config=local \
-              --lto=none \
               --config=pantah \
               //private/devices/google/pantah:gs201_pantah_dist \
               --config=no_download_gki_fips140 \
               --config=no_download_gki \
+              --lto=thin \
+              --dist_dir=out/dist/pantah \
               "${@}"
 
       - name: Pack AnyKernel3
@@ -185,7 +186,17 @@ jobs:
             -name "*.config" -o \
             -name "*defconfig" -o \
             -name "*.tar.gz" -o \
-            -name "*.zip" \
+            -name "*.zip" -o \
+            -name "*.img" -o \
+            -name "*.gz" -o \
+            -name "*.dtb" -o \
+            -name "*.dtbo" -o \
+            -name "*.lz4" -o \
+            -name "*Image" -o \
+            -name "*dtb" -o \
+            -name "*dtbo" -o \
+            -name "*gz" \
+            
           \) -exec cp --parents {} output/ \;
 
           # Comprimir los resultados en un .zip
