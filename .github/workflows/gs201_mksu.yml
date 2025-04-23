@@ -142,7 +142,6 @@ jobs:
               //private/devices/google/pantah:gs201_pantah_dist \
               --config=no_download_gki_fips140 \
               --config=no_download_gki \
-              --lto=thin \
               "${@}"
 
       - name: Pack AnyKernel3
