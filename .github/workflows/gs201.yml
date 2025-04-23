@@ -31,11 +31,9 @@ jobs:
           git config --global user.email "vy@buildbot.tvyiutnhisokewt"
       
       - name: checkout aosp kernel build system
-        run: |
-          cp buildscript ~ 
+        run: | 
           cd ~        
           mkdir kernel
-          cp buildscript kernel
           cd kernel
           repo init -u https://github.com/EduardoA3677/android-gs-pantah-6.1-android15-qpr2 --depth 1
           repo sync -c -j6 --no-tags --no-clone-bundle --force-sync
