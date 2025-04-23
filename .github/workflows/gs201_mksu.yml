@@ -41,7 +41,13 @@ jobs:
           repo sync -c -j6 --no-tags --no-clone-bundle --force-sync
           echo "CURRENT_DIR=$(pwd)" >> $GITHUB_ENV
           echo "La ruta actual es: $CURRENT_DIR"
-     
+   
+      - name: checkout android14-6.1-lts
+        run: |
+          cd ~/kernel
+          rm -rf aosp/
+          git clone https://github.com/EduardoA3677/kernel_common/tree/android14-6.1 -b android14-6.1 --depth=1 aosp
+          
       - name: Set environment variables
         continue-on-error: true
         run: |
@@ -57,8 +63,6 @@ jobs:
           cd ~
           git clone https://gitlab.com/simonpunk/susfs4ksu.git -b gki-android14-6.1
           git clone https://github.com/WildPlusKernel/kernel_patches.git
-          git clone https://github.com/Testady/SukiSU_patch.git
-          mv SukiSU_patch ~/kernel
           mv kernel_patches ~/kernel
           mv susfs4ksu ~/kernel
 
