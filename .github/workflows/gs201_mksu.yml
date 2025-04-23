@@ -82,7 +82,7 @@ jobs:
           cp susfs4ksu/kernel_patches/50_add_susfs_in_gki-android14-6.1.patch ./aosp/
           cp susfs4ksu/kernel_patches/fs/* ./aosp/fs/
           cp susfs4ksu/kernel_patches/include/linux/* ./aosp/include/linux/
-          cp kernel_patches/next/0001-kernel-patch-susfs-v1.5.5-to-KernelSU-Next-v1.0.5.patch ./aosp/
+          cp kernel_patches/next/0001-kernel-patch-susfs-v1.5.5-to-KernelSU-Next-v1.0.5.patch ./aosp/KernelSU-Next
           cp kernel_patches/next/syscall_hooks.patch ./aosp/
           cp kernel_patches/69_hide_stuff.patch ./aosp/
           cd ~/kernel/aosp
