@@ -55,7 +55,7 @@ jobs:
           
       - name: Build Kernel
         run: |
-            cd "$CURRENT_DIR"
+            cd ~/kernel
             tools/bazel run \
               --kernel_package=@//aosp \
               --config=stamp \
