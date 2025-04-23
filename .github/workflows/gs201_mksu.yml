@@ -50,7 +50,7 @@ jobs:
         run: |
           ./pkginstall
 
-- name: Set up ccache
+      - name: Set up ccache
         run: |
           mkdir -p ~/.cache/bazel # Ensure the directory exists
           ccache --version
