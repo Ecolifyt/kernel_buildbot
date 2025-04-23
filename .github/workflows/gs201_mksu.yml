@@ -57,6 +57,8 @@ jobs:
           cd ~
           git clone https://gitlab.com/simonpunk/susfs4ksu.git -b gki-android14-6.1
           git clone https://github.com/WildPlusKernel/kernel_patches.git
+          git clone https://github.com/Testady/SukiSU_patch.git
+          mv SukiSU_patch ~/kernel
           mv kernel_patches ~/kernel
           mv susfs4ksu ~/kernel
 
@@ -78,6 +80,10 @@ jobs:
           cp susfs4ksu/kernel_patches/include/linux/* ./aosp/include/linux/
           cp kernel_patches/next/0001-kernel-patch-susfs-v1.5.5-to-KernelSU-Next-v1.0.5.patch ./aosp/KernelSU-Next/
           cp kernel_patches/next/syscall_hooks.patch ./aosp/
+          cp SukiSU_patch/other/lz4k_patch/6.1/lz4kd.patch ./aosp/
+          cp -r SukiSU_patch/other/lz4k/include/linux/* ./aosp/include/linux
+          cp -r SukiSU_patch/other/lz4k/lib/* ./aosp/lib
+          cp -r SukiSU_patch/other/lz4k/crypto/* ./aosp/crypto
           cd ~/kernel/aosp
           cd ./KernelSU-Next
           patch -p1 < 0001-kernel-patch-susfs-v1.5.5-to-KernelSU-Next-v1.0.5.patch || true
@@ -86,6 +92,7 @@ jobs:
           patch -p1 < 50_add_susfs_in_gki-android14-6.1.patch
           patch -p1 -F 3 < 69_hide_stuff.patch
           patch -p1 -F 3 < syscall_hooks.patch
+          patch -p1 -F 3 < lz4kd.patch || true
           
           cd ~/kernel
           echo "Adding configuration settings to gki_defconfig..."
@@ -116,7 +123,13 @@ jobs:
           echo "CONFIG_IP_NF_TARGET_TTL=y" >> ./aosp/arch/arm64/configs/gki_defconfig
           echo "CONFIG_IP6_NF_TARGET_HL=y" >> ./aosp/arch/arm64/configs/gki_defconfig
           echo "CONFIG_IP6_NF_MATCH_HL=y" >> ./aosp/arch/arm64/configs/gki_defconfig
-          
+          echo "CONFIG_CRYPTO_LZ4HC=y" >> ./aosp/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_CRYPTO_LZ4K=y" >> ./aosp/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_CRYPTO_LZ4KD=y" >> ./aosp/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_CRYPTO_842=y" >> ./aosp/arch/arm64/configs/gki_defconfig
+
+          sed -i 's/CONFIG_ZSMALLOC=m/CONFIG_ZSMALLOC=y/g' ./aosp/arch/arm64/configs/gki_defconfig
+          sed -i 's/CONFIG_ZRAM=m/CONFIG_ZRAM=y/g' ./aosp/arch/arm64/configs/gki_defconfig
           cd ~/kernel
           sed -i 's/check_defconfig//' ./aosp/build.config.gki
           sed -i 's/ -dirty//g' ./aosp/scripts/setlocalversion
