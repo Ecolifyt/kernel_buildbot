@@ -1,16 +1,7 @@
-name: triggered kernel build
+name: Build Pantah kernel
 on:
   workflow_dispatch:
-    inputs:
-      kernel_variant:
-        description: 'Kernel variant to build'
-        required: true
-        type: choice
-        default: gki-ksunext
-        options:
-          - gki
-          - gki-ksunext
-
+  
 jobs:
   build_kernel:
     runs-on: ubuntu-22.04
@@ -57,23 +48,6 @@ jobs:
           ccache --max-size=2G
           ccache --set-config=compression=true
           echo "CCACHE_DIR=$HOME/.ccache" >> $GITHUB_ENV
-      
-      - name: Restore ccache from cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.ccache
-          key: android14-6.1-lts-ccache-${{ github.sha }}
-          restore-keys: |
-            android14-6.1-lts-ccache-
-      
-      - name: Cache toolchain
-        id: cache-toolchain
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/kernel/prebuilts/kernel-build-tools
-            ~/kernel/tools/mkbootimg/
-          key: toolchain-${{ runner.os }}-v1
           
       - name: init credentials
         run: |   
@@ -96,18 +70,27 @@ jobs:
           cd ~/kernel
           rm -rf aosp/
           git clone https://github.com/EduardoA3677/kernel_common -b android14-6.1 --depth=1 aosp
-          
-      - name: Set environment variables
-        continue-on-error: true
-        run: |
-          echo "La ruta actual es: $CURRENT_DIR"
-          echo "AVBTOOL=$CURRENT_DIR/prebuilts/kernel-build-tools/linux-x86/bin/avbtool" >> $GITHUB_ENV
-          echo "MKBOOTIMG=$CURRENT_DIR/tools/mkbootimg/mkbootimg.py" >> $GITHUB_ENV
-          echo "UNPACK_BOOTIMG=$CURRENT_DIR/tools/mkbootimg/unpack_bootimg.py" >> $GITHUB_ENV
-          
+      
+      - name: Restore ccache from cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.ccache
+          key: android14-6.1-lts-ccache-${{ github.sha }}
+          restore-keys: |
+            android14-6.1-lts-ccache-
+      
+      - name: Cache toolchain
+        id: cache-toolchain
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/kernel/prebuilts/kernel-build-tools
+            ~/kernel/tools/mkbootimg/
+          key: toolchain-${{ runner.os }}-v1
+            
+
       # KSU specific steps
       - name: clone wild kernel patches + susfs4ksu
-        if: github.event.inputs.kernel_variant == 'gki-ksunext' || contains(github.ref, 'gki_ksu')
         run: |
           cd ~
           git clone https://gitlab.com/simonpunk/susfs4ksu.git -b gki-android14-6.1
@@ -116,7 +99,6 @@ jobs:
           mv susfs4ksu ~/kernel
 
       - name: patch kernel ksunext susfs
-        if: github.event.inputs.kernel_variant == 'gki-ksunext' || contains(github.ref, 'gki_ksu')
         run: |
           cd ~
           cd kernel/aosp
@@ -197,45 +179,46 @@ jobs:
         run: |
           cd ~/kernel
           git clone -b gs201 --recursive --depth=1 -j $(nproc) https://github.com/EduardoA3677/AnyKernel3.git AnyKernel3
-          #cat ~/kernel/out/pantah/dist/*.dtb > ~/kernel/AnyKernel3/dtb
           cp ~/kernel/out/pantah/dist/dtbo.img ~/kernel/AnyKernel3/dtbo.img
           cp ~/kernel/out/pantah/dist/vendor_kernel_boot.img ~/kernel/AnyKernel3/vendor_kernel_boot.img
-          cd ~/kernel/AnyKernel3
-          cp ~/kernel/out/pantah/dist/Image.lz4 ~/kernel/AnyKernel3/Image.lz4
-          zip -r "../GS201_Android14_6.1_mksu_lz4.zip" ./*
-          rm ~/kernel/AnyKernel3/Image.lz4
-          cp ~/kernel/out/pantah/dist/Image.gz ~/kernel/AnyKernel3/Image.gz
-          zip -r "../GS201_Android14_6.1_mksu_GZ.zip" ./*
-          rm ~/kernel/AnyKernel3/Image.gz
+          cp AnyKernel3 AnyKernel3-gz
+          cp AnyKernel3 AnyKernel3-lz4
+          cp ~/kernel/out/pantah/dist/Image.lz4 ~/kernel/AnyKernel3-lz4/Image.lz4
+          cp ~/kernel/out/pantah/dist/Image.gz ~/kernel/AnyKernel3-gz/Image.gz
           cp ~/kernel/out/pantah/dist/Image ~/kernel/AnyKernel3/Image
-          zip -r "../GS201_Android14_6.1_mksu.zip" ./*
-          rm ~/kernel/AnyKernel3/Image  
     
-      - name: upload AnyKernel3 zip as artifact
-        continue-on-error: true
-        uses: actions/upload-artifact@v4
-        with:
-          name: kernel-dist1-${{ github.event.inputs.kernel_variant || 'gki' }}
-          path: |
-            ~/kernel/GS201_Android14_6.1_mksu.zip
+      - name: Prepare timestamp
+        run: |
+          TIMESTAMP=$(date +'%Y-%m-%d_%H-%M')
+          echo "TIMESTAMP=$TIMESTAMP" >> $GITHUB_ENV
 
+          echo "TIMESTAMP set to: $TIMESTAMP"
+          
       - name: upload AnyKernel3 zip as artifact
         continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
-          name: kernel-dist2-${{ github.event.inputs.kernel_variant || 'gki' }}
+          name: android14-6.1-susfsnext-${TIMESTAMP}
           path: |
-            ~/kernel/GS201_Android14_6.1_mksu_GZ.zip
+            ~/kernel/AnyKernel3
+
+      - name: upload AnyKernel3 gz zip as artifact
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: android14-6.1-susfsnext-${TIMESTAMP}-gz
+          path: |
+            ~/kernel/AnyKernel3-gz
    
-      - name: upload AnyKernel3 zip as artifact
+      - name: upload AnyKernel3 lz4 zip as artifact
         continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
-          name: kernel-dist3-${{ github.event.inputs.kernel_variant || 'gki' }}
+          name: android14-6.1-susfsnext-${TIMESTAMP}-lz4
           path: |
-            ~/kernel/GS201_Android14_6.1_mksu_lz4.zip
+            ~/kernel/AnyKernel3-lz4
             
-      - name: Buscar y comprimir archivos de configuración del kernel
+      - name: Pack build output for testing
         continue-on-error: true
         run: |
           cd ~/kernel/out
@@ -263,39 +246,31 @@ jobs:
           cd output
           zip -r "../kernel_files.zip" ./*
           
-      - name: Subir artifact
+      - name: Upload output to artifacts
         continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
-          name: kernel-files-${{ github.event.inputs.kernel_variant || 'gki' }}
-          path: ~/kernel/out/kernel_files.zip
+          name: android14-6.1-output-${TIMESTAMP}
+          path: ~/kernel/out/output
           
-      - name: Pack kernel build imgs output
+      - name: Pack kernel build img output
         continue-on-error: true
         run: |
           cd ~/kernel/out/pantah/dist
           mkdir imgs
           cp *.img imgs
-          cd imgs
-          zip -r "imgs.zip" ./*
 
-      - name: Pack dist output
-        continue-on-error: true
-        run: |
-          cd ~/kernel/out/pantah/dist
-          zip -r "dist.zip" ./*
-
-      - name: upload dist zip as artifact
+      - name: upload dist folder as artifact
         continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
-          name: kernel-out-${{ github.event.inputs.kernel_variant || 'gki' }}
-          path: ~/kernel/out/pantah/dist/dist.zip
+          name: android14-6.1-dist-${TIMESTAMP}
+          path: ~/kernel/out/pantah/dist
           
-      - name: upload images build zip as artifact
+      - name: upload images build folder as artifact
         continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
-          name: kernel-imgs-${{ github.event.inputs.kernel_variant || 'gki' }}
-          path: ~/kernel/out/pantah/dist/imgs/imgs.zip
+          name: android14-6.1-imgs-${TIMESTAMP}
+          path: ~/kernel/out/pantah/dist/imgs
           
