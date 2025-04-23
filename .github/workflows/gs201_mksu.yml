@@ -70,7 +70,7 @@ jobs:
         run: |
           cd ~/kernel
           rm -rf aosp/
-          git clone https://github.com/EduardoA3677/kernel_common -b android14-6.1 --depth=1 aosp
+          git clone https://github.com/EduardoA3677/gs201.git -b android14-6.1 --depth=1 aosp
       
       # KSU specific steps
       - name: 💫 clone wild kernel patches + susfs4ksu
