@@ -71,6 +71,13 @@ jobs:
           cd ~/kernel
           rm -rf aosp/
           git clone https://github.com/EduardoA3677/gs201.git --depth=1 aosp
+
+      - name: 💫 checkout gxp gs201 patched
+        run: |
+          cd ~/kernel
+          cd private/google-modules/gxp
+          rm -rf gs201
+          git clone https://github.com/EduardoA3677/gxp-gs201.git --depth=1 gs201
       
       # KSU specific steps
       - name: 💫 clone wild kernel patches + susfs4ksu
