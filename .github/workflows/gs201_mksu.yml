@@ -47,6 +47,8 @@ jobs:
           sudo apt-get update
 
           sudo DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y curl git ftp lftp wget libarchive-tools ccache python3 pngcrush schedtool dpkg-dev liblz4-tool make optipng maven device-tree-compiler libc6-dev-i386 libx11-dev lib32z-dev libgl1-mesa-dev xsltproc libxml2-utils libbz2-dev libbz2-1.0 libghc-bzlib-dev squashfs-tools lzop flex tree build-essential bc libssl-dev libfl-dev  gcc-aarch64-linux-gnu pwgen libswitch-perl policycoreutils minicom libxml-sax-base-perl libxml-simple-perl zip unzip tar gzip bzip2 rar unrar bison gperf zlib1g-dev automake binutils openssl kmod cpio flex libelf-dev libtfm-dev ca-certificates xz-utils aria2 pigz gzip bzip2
+          sudo curl --create-dirs -L -o /usr/local/bin/repo -O -L https://storage.googleapis.com/git-repo-downloads/repo
+          sudo chmod a+rx /usr/local/bin/repo
           
       - name: 😎 init credentials
         run: |   
