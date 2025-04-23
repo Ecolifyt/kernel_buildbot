@@ -32,10 +32,8 @@ jobs:
       
       - name: checkout aosp kernel build system
         run: |
-          cp buildscript ~ 
           cd ~        
           mkdir kernel
-          cp buildscript kernel
           cd kernel
           repo init -u https://android.googlesource.com/kernel/manifest -b android-gs-pantah-6.1-android15-qpr2-beta --depth 1
           repo sync -c -j6 --no-tags --no-clone-bundle --force-sync
