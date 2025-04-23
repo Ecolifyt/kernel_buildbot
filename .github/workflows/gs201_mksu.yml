@@ -1,10 +1,10 @@
-name: triggered kernel build
+name: 😎 Build kernels
 on:
   workflow_dispatch:
   
 jobs:
   Read-configuration:
-    name: 🐂 Parse *.config.json
+    name: 🐂 Parse config
     runs-on: ubuntu-latest
     outputs:
       BUILD_DATE: ${{ steps.generate-builddate.outputs.BUILDDATE }}
@@ -46,15 +46,15 @@ jobs:
         run: |
           sudo apt-get update
 
-          sudo DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y curl git ftp lftp wget libarchive-tools ccache python2 python2-dev python3 pngcrush schedtool dpkg-dev liblz4-tool make optipng maven device-tree-compiler libc6-dev-i386 lib32ncurses5-dev libx11-dev lib32z-dev libgl1-mesa-dev xsltproc libxml2-utils libbz2-dev libbz2-1.0 libghc-bzlib-dev squashfs-tools lzop flex tree build-essential bc libssl-dev libfl-dev  gcc-aarch64-linux-gnu pwgen libswitch-perl policycoreutils minicom libxml-sax-base-perl libxml-simple-perl zip unzip tar gzip bzip2 rar unrar bison gperf zlib1g-dev automake binutils openssl kmod cpio flex libelf-dev libtfm-dev ca-certificates xz-utils aria2 pigz gzip bzip2
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y curl git ftp lftp wget libarchive-tools ccache python3 pngcrush schedtool dpkg-dev liblz4-tool make optipng maven device-tree-compiler libc6-dev-i386 libx11-dev lib32z-dev libgl1-mesa-dev xsltproc libxml2-utils libbz2-dev libbz2-1.0 libghc-bzlib-dev squashfs-tools lzop flex tree build-essential bc libssl-dev libfl-dev  gcc-aarch64-linux-gnu pwgen libswitch-perl policycoreutils minicom libxml-sax-base-perl libxml-simple-perl zip unzip tar gzip bzip2 rar unrar bison gperf zlib1g-dev automake binutils openssl kmod cpio flex libelf-dev libtfm-dev ca-certificates xz-utils aria2 pigz gzip bzip2
           
-      - name: init credentials
+      - name: 😎 init credentials
         run: |   
           cd ~      
           git config --global user.name "EduardoA3677"
           git config --global user.email "ealvarado261500@gmail.com"
       
-      - name: checkout aosp kernel build system
+      - name: 🌟 checkout aosp kernel build system
         run: |
           cd ~        
           mkdir kernel
@@ -64,14 +64,14 @@ jobs:
           echo "CURRENT_DIR=$(pwd)" >> $GITHUB_ENV
           echo "La ruta actual es: $CURRENT_DIR"
    
-      - name: checkout android14-6.1-lts
+      - name: 💫 checkout android14-6.1-lts
         run: |
           cd ~/kernel
           rm -rf aosp/
           git clone https://github.com/EduardoA3677/kernel_common -b android14-6.1 --depth=1 aosp
       
       # KSU specific steps
-      - name: clone wild kernel patches + susfs4ksu
+      - name: 💫 clone wild kernel patches + susfs4ksu
         run: |
           cd ~
           git clone https://gitlab.com/simonpunk/susfs4ksu.git -b gki-android14-6.1
@@ -79,7 +79,7 @@ jobs:
           mv kernel_patches ~/kernel
           mv susfs4ksu ~/kernel
 
-      - name: patch kernel ksunext susfs
+      - name: 😎 patch kernel ksunext susfs
         run: |
           cd ~
           cd kernel/aosp
@@ -154,7 +154,7 @@ jobs:
               --config=no_download_gki \
               "${@}"
 
-      - name: Pack AnyKernel3
+      - name: 😋 Pack AnyKernel3
         continue-on-error: true
         env:
           ANYKERNEL3_FILE: "android14-6.1-susfsnext-${{ env.BUILD_DATE }}"
@@ -276,6 +276,7 @@ jobs:
           RELEASE_NAME: "Kernels With KernelSU Next & SUSFS v1.5.6"
           RELEASE_NOTES: |
             ## Release Notes for v${{ env.BUILD_DATE }}.${{ github.run_number }}
+    
             ### Features:
             - [+] KernelSU-Next
             - [+] SUSFS Support
