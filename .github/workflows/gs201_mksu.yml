@@ -1,25 +1,58 @@
-name: Build Pantah kernel
+name: triggered kernel build
 on:
   workflow_dispatch:
   
 jobs:
-  build_kernel:
+  Read-configuration:
+    name: 🐂 Parse *.config.json
     runs-on: ubuntu-latest
+    outputs:
+      BUILD_DATE: ${{ steps.generate-builddate.outputs.BUILDDATE }}
     steps:
-      - name: checkout scripts
+      # This action checks-out your CONFIGSitory under $GITHUB_WORKSPACE, so your workflow can access it.
+      - name: 😄 Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      
-      - name: install packages
-        run: |
-          ./pkginstall
 
+      # Set compile time.
+      - name: ⏰ Set builddate
+        id: generate-builddate
+        run: echo "BUILDDATE=$(date +'%Y%m%d')" >> $GITHUB_OUTPUT
+
+  Build-Kernel:
+    name: "🐎 Build kernel"
+    runs-on: ubuntu-latest
+    needs:
+      - Read-configuration
+    strategy:
+      max-parallel: 6
+      fail-fast: false
+    env:
+      # Basic configuration
+      WORKSPACE: ${{ github.workspace }}
+      BUILD_DATE: "${{ needs.Read-configuration.outputs.BUILD_DATE }}"
+      
+    steps:
+      - name: 📐 Set swap to 16G
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 16
+
+      # This action checks-out your CONFIGSitory under $GITHUB_WORKSPACE, so your workflow can access it.
+      - name: 😄 Checkout
+        uses: actions/checkout@v4
+
+      # Install prerequisites for Ubuntu
+      - name: ⭐ Install prerequisites
+        run: |
+          sudo apt-get update
+
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y curl git ftp lftp wget libarchive-tools ccache python2 python2-dev python3 pngcrush schedtool dpkg-dev liblz4-tool make optipng maven device-tree-compiler libc6-dev-i386 lib32ncurses5-dev libx11-dev lib32z-dev libgl1-mesa-dev xsltproc libxml2-utils libbz2-dev libbz2-1.0 libghc-bzlib-dev squashfs-tools lzop flex tree build-essential bc libssl-dev libfl-dev  gcc-aarch64-linux-gnu pwgen libswitch-perl policycoreutils minicom libxml-sax-base-perl libxml-simple-perl zip unzip tar gzip bzip2 rar unrar bison gperf zlib1g-dev automake binutils openssl kmod cpio flex libelf-dev libtfm-dev ca-certificates xz-utils aria2 pigz gzip bzip2
+          
       - name: init credentials
         run: |   
           cd ~      
-          git config --global user.name "[kernel buildbot] vy"
-          git config --global user.email "vy@buildbot.tvyiutnhisokewt"
+          git config --global user.name "EduardoA3677"
+          git config --global user.email "ealvarado261500@gmail.com"
       
       - name: checkout aosp kernel build system
         run: |
@@ -36,7 +69,7 @@ jobs:
           cd ~/kernel
           rm -rf aosp/
           git clone https://github.com/EduardoA3677/kernel_common -b android14-6.1 --depth=1 aosp
-
+      
       # KSU specific steps
       - name: clone wild kernel patches + susfs4ksu
         run: |
@@ -105,7 +138,7 @@ jobs:
           sed -i 's/check_defconfig//' ./aosp/build.config.gki
           sed -i "/stable_scmversion_cmd/s/-maybe-dirty//g" ./build/kernel/kleaf/impl/stamp.bzl
           
-      - name: Build Kernel
+      - name: "🐎 Build kernel"
         run: |
             set -e
             set -x
@@ -120,10 +153,13 @@ jobs:
               --config=no_download_gki_fips140 \
               --config=no_download_gki \
               "${@}"
-            ccache --show-stats
 
       - name: Pack AnyKernel3
         continue-on-error: true
+        env:
+          ANYKERNEL3_FILE: "android14-6.1-susfsnext-${{ env.BUILD_DATE }}"
+          ANYKERNEL3_FILE_GZ: "android14-6.1-susfsnext-${{ env.BUILD_DATE }}-gz"
+          ANYKERNEL3_FILE_LZ4: "android14-6.1-susfsnext-${{ env.BUILD_DATE }}-lz4"
         run: |
           cd ~/kernel
           git clone -b gs201 --recursive --depth=1 -j $(nproc) https://github.com/EduardoA3677/AnyKernel3.git AnyKernel3
@@ -134,39 +170,47 @@ jobs:
           cp ~/kernel/out/pantah/dist/Image.lz4 ~/kernel/AnyKernel3-lz4/Image.lz4
           cp ~/kernel/out/pantah/dist/Image.gz ~/kernel/AnyKernel3-gz/Image.gz
           cp ~/kernel/out/pantah/dist/Image ~/kernel/AnyKernel3/Image
-    
-      - name: Prepare timestamp
-        run: |
-          TIMESTAMP=$(date +'%Y-%m-%d_%H-%M')
-          echo "TIMESTAMP=$TIMESTAMP" >> $GITHUB_ENV
-
-          echo "TIMESTAMP set to: $TIMESTAMP"
+          cd AnyKernel3 
+          zip -q -r "../${{ env.ANYKERNEL3_FILE }}.zip" *
+          cd ..
+          cd AnyKernel3-gz
+          zip -q -r "../${{ env.ANYKERNEL3_FILE_GZ}}.zip" *
+          cd ..
+          cd AnyKernel3-lz4
+          zip -q -r "../${{ env.ANYKERNEL3_FILE_LZ4}}.zip" *
+          cd ..
           
-      - name: upload AnyKernel3 zip as artifact
+      - name: "💾 Upload AnyKernel3 Image => (${{ env.BUILD_DATE }})"
+        env:
+          ANYKERNEL3_FILE: "android14-6.1-susfsnext-${{ env.BUILD_DATE }}"
         continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
-          name: android14-6.1-susfsnext-${TIMESTAMP}
+          name: ${{ env.ANYKERNEL3_FILE }}
           path: |
-            ~/kernel/AnyKernel3
+            ~/kernel/AnyKernel3/*
 
-      - name: upload AnyKernel3 gz zip as artifact
+      - name: "💾 Upload AnyKernel3 Image.gz => (${{ env.BUILD_DATE }})"
+        env:
+          ANYKERNEL3_FILE_GZ: "android14-6.1-susfsnext-${{ env.BUILD_DATE }}-gz"
         continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
-          name: android14-6.1-susfsnext-${TIMESTAMP}-gz
+          name: ${{ env.ANYKERNEL3_FILE_GZ }}
           path: |
-            ~/kernel/AnyKernel3-gz
+            ~/kernel/AnyKernel3-gz/*
    
-      - name: upload AnyKernel3 lz4 zip as artifact
+      - name: "💾 Upload AnyKernel3 Image.lz4 => (${{ env.BUILD_DATE }})"
+        env:
+          ANYKERNEL3_FILE_LZ4: "android14-6.1-susfsnext-${{ env.BUILD_DATE }}-lz4"
         continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
-          name: android14-6.1-susfsnext-${TIMESTAMP}-lz4
+          name: ${{ env.ANYKERNEL3_FILE_LZ4 }}
           path: |
-            ~/kernel/AnyKernel3-lz4
+            ~/kernel/AnyKernel3-lz4/*
             
-      - name: Pack build output for testing
+      - name: ⏰ Pack output directory
         continue-on-error: true
         run: |
           cd ~/kernel/out
@@ -192,33 +236,56 @@ jobs:
 
           # Comprimir los resultados en un .zip
           cd output
-          zip -r "../kernel_files.zip" ./*
           
-      - name: Upload output to artifacts
+      - name: ☢️ Upload output directory
         continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
-          name: android14-6.1-output-${TIMESTAMP}
+          name: android14-6.1-output-${{ env.BUILD_DATE }}
           path: ~/kernel/out/output
           
-      - name: Pack kernel build img output
+      - name: ⏰ Pack output images directory
         continue-on-error: true
         run: |
           cd ~/kernel/out/pantah/dist
           mkdir imgs
           cp *.img imgs
 
-      - name: upload dist folder as artifact
+      - name: ☢️ Upload images directory
         continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
-          name: android14-6.1-dist-${TIMESTAMP}
-          path: ~/kernel/out/pantah/dist
-          
-      - name: upload images build folder as artifact
-        continue-on-error: true
-        uses: actions/upload-artifact@v4
-        with:
-          name: android14-6.1-imgs-${TIMESTAMP}
+          name: android14-6.1-imgs-${{ env.BUILD_DATE }}
           path: ~/kernel/out/pantah/dist/imgs
           
+      - name:  ☢️ Upload output dist directory
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: android14-6.1-dist-${{ env.BUILD_DATE }}
+          path: ~/kernel/out/pantah/dist
+  
+      - name: 🧧 Create GitHub Release => (${{ env.BUILD_DATE }})
+        env:
+          ANYKERNEL3_FILE: "~/kernel/android14-6.1-susfsnext-${{ env.BUILD_DATE }}"
+          ANYKERNEL3_FILE-GZ: "~/kernel/android14-6.1-susfsnext-${{ env.BUILD_DATE }}-gz"
+          ANYKERNEL3_FILE_LZ4: "~/kernel/android14-6.1-susfsnext-${{ env.BUILD_DATE }}-lz4"
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO_OWNER: EduardoA3677
+          REPO_NAME: kernel_buildbot
+          RELEASE_NAME: "Kernels With KernelSU Next & SUSFS v1.5.6"
+          RELEASE_NOTES: |
+            ## Release Notes for v${{ env.BUILD_DATE }}.${{ github.run_number }}
+            ### Features:
+            - [+] KernelSU-Next
+            - [+] SUSFS Support
+            - [+] Magic Mount Support
+        continue-on-error: true
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ env.BUILD_DATE }}.${{ github.run_number }}
+          files: |
+            "${{ env.ANYKERNEL3_FILE }}.zip"
+            "${{ env.ANYKERNEL3_FILE_GZ }}.zip"
+            "${{ env.ANYKERNEL3_FILE_LZ4 }}.zip"
+          generate_release_notes: true
