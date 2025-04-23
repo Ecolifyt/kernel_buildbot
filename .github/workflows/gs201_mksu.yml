@@ -167,8 +167,8 @@ jobs:
           git clone -b gs201 --recursive --depth=1 -j $(nproc) https://github.com/EduardoA3677/AnyKernel3.git AnyKernel3
           cp ~/kernel/out/pantah/dist/dtbo.img ~/kernel/AnyKernel3/dtbo.img
           cp ~/kernel/out/pantah/dist/vendor_kernel_boot.img ~/kernel/AnyKernel3/vendor_kernel_boot.img
-          cp AnyKernel3 AnyKernel3-gz
-          cp AnyKernel3 AnyKernel3-lz4
+          cp -r ~/kernel/AnyKernel3 ~/kernel/AnyKernel3-gz
+          cp -r ~/kernel/AnyKernel3 ~/kernel/AnyKernel3-lz4
           cp ~/kernel/out/pantah/dist/Image.lz4 ~/kernel/AnyKernel3-lz4/Image.lz4
           cp ~/kernel/out/pantah/dist/Image.gz ~/kernel/AnyKernel3-gz/Image.gz
           cp ~/kernel/out/pantah/dist/Image ~/kernel/AnyKernel3/Image
