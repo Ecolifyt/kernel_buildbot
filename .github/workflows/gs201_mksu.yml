@@ -101,8 +101,8 @@ jobs:
               --kernel_package=@//aosp \
               --config=local \
               --lto=thin \
-              --config=pantah \
-              //private/devices/google/pantah:gs201_pantah_dist \
+              --config=gs201 \
+              //private/devices/google/gs201:dist \
               --config=no_download_gki \
               "${@}"
 
@@ -114,14 +114,14 @@ jobs:
           ANYKERNEL3_FILE_LZ4: "android14-6.1-susfsnext-${{ env.BUILD_DATE }}-lz4"
         run: |
           cd ~/kernel
-          git clone -b gs201 --recursive --depth=1 -j $(nproc) https://github.com/EduardoA3677/AnyKernel3.git AnyKernel3
-          cp ~/kernel/out/pantah/dist/dtbo.img ~/kernel/AnyKernel3/dtbo.img
-          cp ~/kernel/out/pantah/dist/vendor_kernel_boot.img ~/kernel/AnyKernel3/vendor_kernel_boot.img
+          git clone -b pantah --recursive --depth=1 -j $(nproc) https://github.com/EduardoA3677/AnyKernel3.git AnyKernel3
+          cp ~/kernel/out/gs201/dist/dtbo.img ~/kernel/AnyKernel3/dtbo.img
+          cp ~/kernel/out/gs201/dist/vendor_kernel_boot.img ~/kernel/AnyKernel3/vendor_kernel_boot.img
           cp -r ~/kernel/AnyKernel3 ~/kernel/AnyKernel3-gz
           cp -r ~/kernel/AnyKernel3 ~/kernel/AnyKernel3-lz4
-          cp ~/kernel/out/pantah/dist/Image.lz4 ~/kernel/AnyKernel3-lz4/Image.lz4
-          cp ~/kernel/out/pantah/dist/Image.gz ~/kernel/AnyKernel3-gz/Image.gz
-          cp ~/kernel/out/pantah/dist/Image ~/kernel/AnyKernel3/Image
+          cp ~/kernel/out/gs201/dist/Image.lz4 ~/kernel/AnyKernel3-lz4/Image.lz4
+          cp ~/kernel/out/gs201/dist/Image.gz ~/kernel/AnyKernel3-gz/Image.gz
+          cp ~/kernel/out/gs201/dist/Image ~/kernel/AnyKernel3/Image
           cd AnyKernel3 
           zip -q -r "../${{ env.ANYKERNEL3_FILE }}.zip" *
           cd ..
@@ -199,7 +199,7 @@ jobs:
       - name: ⏰ Pack output images directory
         continue-on-error: true
         run: |
-          cd ~/kernel/out/pantah/dist
+          cd ~/kernel/out/gs201/dist
           mkdir imgs
           cp *.img imgs
 
@@ -208,14 +208,14 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: android14-6.1-imgs-${{ env.BUILD_DATE }}
-          path: ~/kernel/out/pantah/dist/imgs
+          path: ~/kernel/out/gs201/dist/imgs
           
       - name:  ☢️ Upload output dist directory
         continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: android14-6.1-dist-${{ env.BUILD_DATE }}
-          path: ~/kernel/out/pantah/dist
+          path: ~/kernel/out/gs201/dist
   
       - name: 🧧 Create GitHub Release => (${{ env.BUILD_DATE }})
         env:
