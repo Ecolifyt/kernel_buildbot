@@ -61,7 +61,7 @@ jobs:
           cd ~        
           mkdir kernel
           cd kernel
-          repo init -u https://android.googlesource.com/kernel/common -b android-gs-pantah-6.1-android15-qpr2-beta --depth 1
+          repo init -u https://android.googlesource.com/kernel/manifest -b android-gs-pantah-6.1-android15-qpr2-beta --depth 1
           repo sync -c -j6 --no-tags --no-clone-bundle --force-sync
           echo "CURRENT_DIR=$(pwd)" >> $GITHUB_ENV
           echo "La ruta actual es: $CURRENT_DIR"
