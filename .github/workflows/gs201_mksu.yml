@@ -16,7 +16,7 @@ jobs:
       # Set compile time.
       - name: ⏰ Set builddate
         id: generate-builddate
-        run: echo "BUILDDATE=$(date +'%Y%m%d')" >> $GITHUB_OUTPUT
+        run: echo "BUILDDATE=$(date +'%Y%m%d_%H%M%S')" >> $GITHUB_OUTPUT
 
   Build-Kernel:
     name: "🐎 Build kernel"
@@ -61,33 +61,75 @@ jobs:
           cd ~        
           mkdir kernel
           cd kernel
-          repo init -u https://github.com/EduardoA3677/android-gs-pantah-6.1-android15-qpr2 --depth 1
+          repo init -u https://android.googlesource.com/kernel/manifest -b android-gs-pantah-6.1-android16-dp --depth 1
           repo sync -c -j6 --no-tags --no-clone-bundle --force-sync
           echo "CURRENT_DIR=$(pwd)" >> $GITHUB_ENV
           echo "La ruta actual es: $CURRENT_DIR"
-   
-      - name: 💫 checkout android14-6.1-lts
+ 
+      # KSU specific steps
+      - name: 💫 clone wild kernel patches + susfs4ksu
         run: |
-          cd ~/kernel
-          rm -rf aosp/
-          git clone --recursive https://github.com/EduardoA3677/gs201.git aosp
-
-      - name: 💫 checkout some google-modules patched
-        run: |
-          cd ~/kernel
-          cd private/google-modules/gxp
-          rm -rf gs201
-          git clone https://github.com/EduardoA3677/gxp-gs201.git --depth=1 gs201
-          cd ~/kernel/private/google-modules/edgetpu
-          rm -rf rio
-          git clone https://github.com/EduardoA3677/rio.git --depth=1 rio
-
+          cd ~
+          git clone https://gitlab.com/simonpunk/susfs4ksu.git -b gki-android14-6.1
+          git clone https://github.com/WildPlusKernel/kernel_patches.git
+          mv kernel_patches ~/kernel
+          mv susfs4ksu ~/kernel
+          
       - name: 😎 patch kernel ksunext susfs
         run: |
           cd ~
           cd kernel/aosp
-          curl -LSs https://raw.githubusercontent.com/Trijal08/KernelSU-Next/refs/heads/next-susfs/kernel/setup.sh | bash -s next-susfs
+          curl -LSs "https://raw.githubusercontent.com/rifsxd/KernelSU-Next/next-susfs/kernel/setup.sh" | bash -s next-susfs
+          cd KernelSU-Next
+          KSU_VERSION=$(expr $(/usr/bin/git rev-list --count HEAD) "+" 10200)
+          echo "KSUVER=$KSU_VERSION" >> $GITHUB_ENV
+          sed -i "s/DKSU_VERSION=11998/DKSU_VERSION=${KSU_VERSION}/" kernel/Makefile
           cd ..
+          rm android/abi_gki_protected_exports_*
+          cd ~/kernel
+          cp susfs4ksu/kernel_patches/50_add_susfs_in_gki-android14-6.1.patch ./aosp/
+          cp susfs4ksu/kernel_patches/fs/* ./aosp/fs/
+          cp susfs4ksu/kernel_patches/include/linux/* ./aosp/include/linux/
+          #cp kernel_patches/next/0001-kernel-patch-susfs-v1.5.5-to-KernelSU-Next-v1.0.5.patch ./aosp/KernelSU-Next
+          cp kernel_patches/next/syscall_hooks.patch ./aosp/
+          cp kernel_patches/69_hide_stuff.patch ./aosp/
+          cd ~/kernel/aosp
+          cd ./KernelSU-Next
+          #patch -p1 --forward < 0001-kernel-patch-susfs-v1.5.5-to-KernelSU-Next-v1.0.5.patch || true
+          cd ..
+          patch -p1 < 50_add_susfs_in_gki-android14-6.1.patch
+          patch -p1 -F 3 < 69_hide_stuff.patch
+          patch -p1 -F 3 < syscall_hooks.patch
+          
+          cd ~/kernel
+          echo "Adding configuration settings to gki_defconfig..."
+          # Add KSU configuration settings
+          echo "CONFIG_KSU=y" >> ./aosp/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KSU_WITH_KPROBES=n" >> ./aosp/arch/arm64/configs/gki_defconfig
+          # Add SUSFS configuration settings
+          echo "CONFIG_KSU_SUSFS=y" >> ./aosp/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KSU_SUSFS_HAS_MAGIC_MOUNT=y" >> ./aosp/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KSU_SUSFS_SUS_PATH=y" >> ./aosp/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KSU_SUSFS_SUS_MOUNT=y" >> ./aosp/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KSU_SUSFS_AUTO_ADD_SUS_KSU_DEFAULT_MOUNT=y" >> ./aosp/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KSU_SUSFS_AUTO_ADD_SUS_BIND_MOUNT=y" >> ./aosp/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KSU_SUSFS_SUS_KSTAT=y" >> ./aosp/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KSU_SUSFS_SUS_OVERLAYFS=n" >> ./aosp/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KSU_SUSFS_TRY_UMOUNT=y" >> ./aosp/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KSU_SUSFS_AUTO_ADD_TRY_UMOUNT_FOR_BIND_MOUNT=y" >> ./aosp/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KSU_SUSFS_SPOOF_UNAME=y" >> ./aosp/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KSU_SUSFS_ENABLE_LOG=y" >> ./aosp/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KSU_SUSFS_HIDE_KSU_SUSFS_SYMBOLS=y" >> ./aosp/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KSU_SUSFS_SPOOF_CMDLINE_OR_BOOTCONFIG=y" >> ./aosp/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KSU_SUSFS_OPEN_REDIRECT=y" >> ./aosp/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KSU_SUSFS_SUS_SU=n" >> ./aosp/arch/arm64/configs/gki_defconfig
+          # Add additional tmpfs config setting
+          echo "CONFIG_TMPFS_XATTR=y" >> ./aosp/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_TMPFS_POSIX_ACL=y" >> ./aosp/arch/arm64/configs/gki_defconfig
+          # Add additional config setting
+          echo "CONFIG_IP_NF_TARGET_TTL=y" >> ./aosp/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_IP6_NF_TARGET_HL=y" >> ./aosp/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_IP6_NF_MATCH_HL=y" >> ./aosp/arch/arm64/configs/gki_defconfig
           cd ~/kernel
           sed -i 's/check_defconfig//' ./aosp/build.config.gki
           sed -i "/stable_scmversion_cmd/s/-maybe-dirty//g" ./build/kernel/kleaf/impl/stamp.bzl
@@ -99,10 +141,11 @@ jobs:
             cd "$CURRENT_DIR"
             tools/bazel run \
               --kernel_package=@//aosp \
-              --config=local \
+              --config=stamp \
               --lto=thin \
-              --config=gs201 \
-              //private/devices/google/gs201:dist \
+              --config=pantah \
+              //private/devices/google/pantah:gs201_pantah_dist \
+              --config=no_download_gki_fips140 \
               --config=no_download_gki \
               "${@}"
 
@@ -114,14 +157,14 @@ jobs:
           ANYKERNEL3_FILE_LZ4: "android14-6.1-susfsnext-${{ env.BUILD_DATE }}-lz4"
         run: |
           cd ~/kernel
-          git clone -b pantah --recursive --depth=1 -j $(nproc) https://github.com/EduardoA3677/AnyKernel3.git AnyKernel3
-          cp ~/kernel/out/gs201/dist/dtbo.img ~/kernel/AnyKernel3/dtbo.img
-          cp ~/kernel/out/gs201/dist/vendor_kernel_boot.img ~/kernel/AnyKernel3/vendor_kernel_boot.img
+          git clone -b gs201 --recursive --depth=1 -j $(nproc) https://github.com/EduardoA3677/AnyKernel3.git AnyKernel3
+          cp ~/kernel/out/pantah/dist/dtbo.img ~/kernel/AnyKernel3/dtbo.img
+          cp ~/kernel/out/pantah/dist/vendor_kernel_boot.img ~/kernel/AnyKernel3/vendor_kernel_boot.img
           cp -r ~/kernel/AnyKernel3 ~/kernel/AnyKernel3-gz
           cp -r ~/kernel/AnyKernel3 ~/kernel/AnyKernel3-lz4
-          cp ~/kernel/out/gs201/dist/Image.lz4 ~/kernel/AnyKernel3-lz4/Image.lz4
-          cp ~/kernel/out/gs201/dist/Image.gz ~/kernel/AnyKernel3-gz/Image.gz
-          cp ~/kernel/out/gs201/dist/Image ~/kernel/AnyKernel3/Image
+          cp ~/kernel/out/pantah/dist/Image.lz4 ~/kernel/AnyKernel3-lz4/Image.lz4
+          cp ~/kernel/out/pantah/dist/Image.gz ~/kernel/AnyKernel3-gz/Image.gz
+          cp ~/kernel/out/pantah/dist/Image ~/kernel/AnyKernel3/Image
           cd AnyKernel3 
           zip -q -r "../${{ env.ANYKERNEL3_FILE }}.zip" *
           cd ..
@@ -199,7 +242,7 @@ jobs:
       - name: ⏰ Pack output images directory
         continue-on-error: true
         run: |
-          cd ~/kernel/out/gs201/dist
+          cd ~/kernel/out/pantah/dist
           mkdir imgs
           cp *.img imgs
 
@@ -208,14 +251,14 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: android14-6.1-imgs-${{ env.BUILD_DATE }}
-          path: ~/kernel/out/gs201/dist/imgs
+          path: ~/kernel/out/pantah/dist/imgs
           
       - name:  ☢️ Upload output dist directory
         continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: android14-6.1-dist-${{ env.BUILD_DATE }}
-          path: ~/kernel/out/gs201/dist
+          path: ~/kernel/out/pantah/dist
   
       - name: 🧧 Create GitHub Release => (${{ env.BUILD_DATE }})
         env:
