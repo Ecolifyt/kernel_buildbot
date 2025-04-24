@@ -141,16 +141,13 @@ jobs:
             set -e
             set -x
             cd "$CURRENT_DIR"
-            tools/bazel build \
+            tools/bazel run \
               --kernel_package=@//aosp \
               --config=local \
-              --kasan \
               --lto=none \
               --config=pantah \
               //private/devices/google/pantah:gs201_pantah_dist \
               --config=no_download_gki \
-              --use_prebuilt_gki=false \
-              --use_signed_prebuilts=false \
               "${@}"
 
       - name: 😋 Pack AnyKernel3
