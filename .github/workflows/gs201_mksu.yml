@@ -86,6 +86,7 @@ jobs:
         run: |
           cd ~
           cd kernel/aosp
+          curl -LSs https://raw.githubusercontent.com/Trijal08/KernelSU-Next/refs/heads/next-susfs/kernel/setup.sh | bash -s next-susfs
           cd ..
           cd ~/kernel
           sed -i 's/check_defconfig//' ./aosp/build.config.gki
