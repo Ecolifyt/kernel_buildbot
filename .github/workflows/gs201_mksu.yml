@@ -61,7 +61,7 @@ jobs:
           cd ~        
           mkdir kernel
           cd kernel
-          repo init -u https://github.com/EduardoA3677/android-gs-pantah-6.1-android15-qpr2 --depth 1
+          repo init -u https://android.googlesource.com/kernel/common -b android-gs-pantah-6.1-android15-qpr2-beta --depth 1
           repo sync -c -j6 --no-tags --no-clone-bundle --force-sync
           echo "CURRENT_DIR=$(pwd)" >> $GITHUB_ENV
           echo "La ruta actual es: $CURRENT_DIR"
@@ -79,6 +79,8 @@ jobs:
         run: |
           cd ~
           cd kernel/aosp
+          wget https://github.com/EduardoA3677/kernel_buildbot/blob/sauce/scm.patch
+          patch -p1 < scm.patch
           curl -LSs "https://raw.githubusercontent.com/rifsxd/KernelSU-Next/next-susfs/kernel/setup.sh" | bash -s next-susfs
           cd KernelSU-Next
           KSU_VERSION=$(expr $(/usr/bin/git rev-list --count HEAD) "+" 10200)
@@ -139,13 +141,14 @@ jobs:
             set -e
             set -x
             cd "$CURRENT_DIR"
-            tools/bazel run \
+            tools/bazel build \
               --kernel_package=@//aosp \
-              --config=stamp \
-              --lto=thin \
+              --config=local \
+              --kasan \
+              --lto=none \
               --config=pantah \
               //private/devices/google/pantah:gs201_pantah_dist \
-              --config=no_download_gki_fips140 \
+              --config=no_download_gki \
               --use_prebuilt_gki=false \
               --use_signed_prebuilts=false \
               "${@}"
