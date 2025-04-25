@@ -81,7 +81,7 @@ jobs:
           cd kernel/aosp
           wget https://raw.githubusercontent.com/EduardoA3677/kernel_buildbot/refs/heads/sauce/scm.patch
           patch -p1 < scm.patch || true
-          curl -LSs "https://raw.githubusercontent.com/rifsxd/KernelSU-Next/next-susfs/kernel/setup.sh" | bash -s next-susfs
+          curl -LSs "https://raw.githubusercontent.com/rifsxd/KernelSU-Next/next-susfs/kernel/setup.sh" | bash -s next-susfs-dev
           cd KernelSU-Next
           KSU_VERSION=$(expr $(/usr/bin/git rev-list --count HEAD) "+" 10200)
           echo "KSUVER=$KSU_VERSION" >> $GITHUB_ENV
