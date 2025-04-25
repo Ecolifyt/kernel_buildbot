@@ -79,8 +79,6 @@ jobs:
         run: |
           cd ~
           cd kernel/aosp
-          wget https://raw.githubusercontent.com/EduardoA3677/kernel_buildbot/refs/heads/sauce/scm.patch
-          patch -p1 < scm.patch || true
           curl -LSs "https://raw.githubusercontent.com/rifsxd/KernelSU-Next/next-susfs/kernel/setup.sh" | bash -s next-susfs-dev
           cd KernelSU-Next
           KSU_VERSION=$(expr $(/usr/bin/git rev-list --count HEAD) "+" 10200)
@@ -132,8 +130,15 @@ jobs:
           echo "CONFIG_IP_NF_TARGET_TTL=y" >> ./aosp/arch/arm64/configs/gki_defconfig
           echo "CONFIG_IP6_NF_TARGET_HL=y" >> ./aosp/arch/arm64/configs/gki_defconfig
           echo "CONFIG_IP6_NF_MATCH_HL=y" >> ./aosp/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_TCP_CONG_ADVANCED=y" >> ./aosp/arch/arm64/configs/gki_defconfig 
+          echo "CONFIG_TCP_CONG_BBR=y" >> ./aosp/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_NET_SCH_FQ=y" >> ./aosp/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_TCP_CONG_BIC=n" >> ./aosp/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_TCP_CONG_WESTWOOD=n" >> ./aosp/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_TCP_CONG_HTCP=n" >> ./aosp/arch/arm64/configs/gki_defconfig 
           cd ~/kernel
           sed -i 's/check_defconfig//' ./aosp/build.config.gki
+          perl -pi -e 's{UTS_VERSION="\$\(echo \$UTS_VERSION \$CONFIG_FLAGS \$TIMESTAMP \| cut -b -\$UTS_LEN\)"}{UTS_VERSION="#1 SMP PREEMPT Sat Apr 20 04:20:00 UTC 2024"}' ./aosp/scripts/mkcompile_h
           sed -i "/stable_scmversion_cmd/s/-maybe-dirty//g" ./build/kernel/kleaf/impl/stamp.bzl
           
       - name: "🐎 Build kernel"
@@ -143,11 +148,11 @@ jobs:
             cd "$CURRENT_DIR"
             tools/bazel run \
               --kernel_package=@//aosp \
-              --config=local \
-              --lto=none \
+              --config=stamp \
               --config=pantah \
               //private/devices/google/pantah:gs201_pantah_dist \
               --config=no_download_gki \
+              --lto=thin \
               "${@}"
 
       - name: 😋 Pack AnyKernel3
