@@ -157,6 +157,7 @@ jobs:
           ANYKERNEL3_FILE_LZ4: "android14-6.1-susfsnext-${{ env.BUILD_DATE }}-lz4"
         run: |
           cd ~/kernel
+          echo "BUILD_PATH=$(pwd)" >> $GITHUB_ENV
           git clone -b gs201 --recursive --depth=1 -j $(nproc) https://github.com/EduardoA3677/AnyKernel3.git AnyKernel3
           cp ~/kernel/out/pantah/dist/dtbo.img ~/kernel/AnyKernel3/dtbo.img
           cp ~/kernel/out/pantah/dist/vendor_kernel_boot.img ~/kernel/AnyKernel3/vendor_kernel_boot.img
@@ -262,16 +263,12 @@ jobs:
   
       - name: 🧧 Create GitHub Release => (${{ env.BUILD_DATE }})
         env:
-          ANYKERNEL3_FILE: "~/kernel/android14-6.1-susfsnext-${{ env.BUILD_DATE }}"
-          ANYKERNEL3_FILE-GZ: "~/kernel/android14-6.1-susfsnext-${{ env.BUILD_DATE }}-gz"
-          ANYKERNEL3_FILE_LZ4: "~/kernel/android14-6.1-susfsnext-${{ env.BUILD_DATE }}-lz4"
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO_OWNER: EduardoA3677
           REPO_NAME: kernel_buildbot
           RELEASE_NAME: "Kernels With KernelSU Next & SUSFS v1.5.6"
           RELEASE_NOTES: |
             ## Release Notes for v${{ env.BUILD_DATE }}.${{ github.run_number }}
-    
             ### Features:
             - [+] KernelSU-Next
             - [+] SUSFS Support
@@ -281,7 +278,7 @@ jobs:
         with:
           tag_name: v${{ env.BUILD_DATE }}.${{ github.run_number }}
           files: |
-            "${{ env.ANYKERNEL3_FILE }}.zip"
-            "${{ env.ANYKERNEL3_FILE_GZ }}.zip"
-            "${{ env.ANYKERNEL3_FILE_LZ4 }}.zip"
+             ${{ env.BUILD_PATH }}/android14-6.1-susfsnext-${{ env.BUILD_DATE }}.zip
+             ${{ env.BUILD_PATH }}/android14-6.1-susfsnext-${{ env.BUILD_DATE }}-gz.zip
+             ${{ env.BUILD_PATH }}/android14-6.1-susfsnext-${{ env.BUILD_DATE }}-lz4.zip
           generate_release_notes: true
