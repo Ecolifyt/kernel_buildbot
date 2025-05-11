@@ -1,0 +1,241 @@
+name: Build kernels Kali
+on:
+  workflow_dispatch:
+  
+jobs:
+  Read-configuration:
+    name: 🐂 Parse config
+    runs-on: ubuntu-latest
+    outputs:
+      BUILD_DATE: ${{ steps.generate-builddate.outputs.BUILDDATE }}
+    steps:
+      # This action checks-out your CONFIGSitory under $GITHUB_WORKSPACE, so your workflow can access it.
+      - name: 😄 Checkout
+        uses: actions/checkout@v4
+
+      # Set compile time.
+      - name: ⏰ Set builddate
+        id: generate-builddate
+        run: echo "BUILDDATE=$(date +'%Y%m%d_%H%M%S')" >> $GITHUB_OUTPUT
+
+  Build-Kernel:
+    name: "🐎 Build kernel"
+    runs-on: ubuntu-latest
+    needs:
+      - Read-configuration
+    strategy:
+      max-parallel: 6
+      fail-fast: false
+    env:
+      # Basic configuration
+      WORKSPACE: ${{ github.workspace }}
+      BUILD_DATE: "${{ needs.Read-configuration.outputs.BUILD_DATE }}"
+      
+    steps:
+      - name: 📐 Set swap to 16G
+        uses: pierotofy/set-swap-space@master
+        with:
+          swap-size-gb: 16
+
+      # This action checks-out your CONFIGSitory under $GITHUB_WORKSPACE, so your workflow can access it.
+      - name: 😄 Checkout
+        uses: actions/checkout@v4
+
+      # Install prerequisites for Ubuntu
+      - name: ⭐ Install prerequisites
+        run: |
+          sudo apt-get update
+
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y curl git ftp lftp wget libarchive-tools ccache python3 pngcrush schedtool dpkg-dev liblz4-tool make optipng maven device-tree-compiler libc6-dev-i386 libx11-dev lib32z-dev libgl1-mesa-dev xsltproc libxml2-utils libbz2-dev libbz2-1.0 libghc-bzlib-dev squashfs-tools lzop flex tree build-essential bc libssl-dev libfl-dev  gcc-aarch64-linux-gnu pwgen libswitch-perl policycoreutils minicom libxml-sax-base-perl libxml-simple-perl zip unzip tar gzip bzip2 rar unrar bison gperf zlib1g-dev automake binutils openssl kmod cpio flex libelf-dev libtfm-dev ca-certificates xz-utils aria2 pigz gzip bzip2
+          sudo curl --create-dirs -L -o /usr/local/bin/repo -O -L https://storage.googleapis.com/git-repo-downloads/repo
+          sudo chmod a+rx /usr/local/bin/repo
+          
+      - name: 😎 init credentials
+        run: |   
+          cd ~      
+          git config --global user.name "EduardoA3677"
+          git config --global user.email "ealvarado261500@gmail.com"
+      
+      - name: 🌟 checkout aosp kernel build system
+        run: |
+          cd ~        
+          mkdir kernel
+          cd kernel
+          repo init -u https://android.googlesource.com/kernel/manifest -b android-gs-pantah-6.1-android15-qpr2-beta --depth 1
+          repo sync -c -j6 --no-tags --no-clone-bundle --force-sync
+          echo "CURRENT_DIR=$(pwd)" >> $GITHUB_ENV
+          echo "La ruta actual es: $CURRENT_DIR"
+ 
+      # KSU specific steps
+      - name: 💫 clone custom aosp kernel branch
+        run: |
+          cd ~
+          cd kernel 
+          rm -rf aosp
+          git clone https://github.com/EduardoA3677/gs201.git -b Kali aosp
+          
+      - name: 😎 patch kernel
+        run: |
+          cd ~
+          cd kernel/aosp
+          rm android/abi_gki_protected_exports_*
+          cd ~/kernel
+          # Add additional tmpfs config setting
+          echo "CONFIG_TMPFS_XATTR=y" >> ./aosp/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_TMPFS_POSIX_ACL=y" >> ./aosp/arch/arm64/configs/gki_defconfig
+          # Add additional config setting
+          echo "CONFIG_IP_NF_TARGET_TTL=y" >> ./aosp/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_IP6_NF_TARGET_HL=y" >> ./aosp/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_IP6_NF_MATCH_HL=y" >> ./aosp/arch/arm64/configs/gki_defconfig
+          cd ~/kernel
+          sed -i 's/check_defconfig//' ./aosp/build.config.gki
+          perl -pi -e 's{UTS_VERSION="\$\(echo \$UTS_VERSION \$CONFIG_FLAGS \$TIMESTAMP \| cut -b -\$UTS_LEN\)"}{UTS_VERSION="#1 SMP PREEMPT Sat Apr 20 04:20:00 UTC 2024"}' ./aosp/scripts/mkcompile_h
+          sed -i "/stable_scmversion_cmd/s/-maybe-dirty//g" ./build/kernel/kleaf/impl/stamp.bzl
+          
+      - name: "🐎 Build kernel"
+        run: |
+            set -e
+            set -x
+            cd "$CURRENT_DIR"
+            tools/bazel run \
+              --kernel_package=@//aosp \
+              --config=stamp \
+              --config=pantah \
+              //private/devices/google/pantah:gs201_pantah_dist \
+              --config=no_download_gki \
+              --lto=thin \
+              "${@}"
+
+      - name: 😋 Pack AnyKernel3
+        continue-on-error: true
+        env:
+          ANYKERNEL3_FILE: "android14-6.1-susfsnext-${{ env.BUILD_DATE }}"
+          ANYKERNEL3_FILE_GZ: "android14-6.1-susfsnext-${{ env.BUILD_DATE }}-gz"
+          ANYKERNEL3_FILE_LZ4: "android14-6.1-susfsnext-${{ env.BUILD_DATE }}-lz4"
+        run: |
+          cd ~/kernel
+          echo "BUILD_PATH=$(pwd)" >> $GITHUB_ENV
+          git clone -b gs201 --recursive --depth=1 -j $(nproc) https://github.com/EduardoA3677/AnyKernel3.git AnyKernel3
+          cp ~/kernel/out/pantah/dist/dtbo.img ~/kernel/AnyKernel3/dtbo.img
+          cp ~/kernel/out/pantah/dist/vendor_kernel_boot.img ~/kernel/AnyKernel3/vendor_kernel_boot.img
+          cp -r ~/kernel/AnyKernel3 ~/kernel/AnyKernel3-gz
+          cp -r ~/kernel/AnyKernel3 ~/kernel/AnyKernel3-lz4
+          cp ~/kernel/out/pantah/dist/Image.lz4 ~/kernel/AnyKernel3-lz4/Image.lz4
+          cp ~/kernel/out/pantah/dist/Image.gz ~/kernel/AnyKernel3-gz/Image.gz
+          cp ~/kernel/out/pantah/dist/Image ~/kernel/AnyKernel3/Image
+          cd AnyKernel3 
+          zip -q -r "../${{ env.ANYKERNEL3_FILE }}.zip" *
+          cd ..
+          cd AnyKernel3-gz
+          zip -q -r "../${{ env.ANYKERNEL3_FILE_GZ}}.zip" *
+          cd ..
+          cd AnyKernel3-lz4
+          zip -q -r "../${{ env.ANYKERNEL3_FILE_LZ4}}.zip" *
+          cd ..
+          
+      - name: "💾 Upload AnyKernel3 Image => (${{ env.BUILD_DATE }})"
+        env:
+          ANYKERNEL3_FILE: "android14-6.1-susfsnext-${{ env.BUILD_DATE }}"
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ANYKERNEL3_FILE }}
+          path: |
+            ~/kernel/AnyKernel3/*
+
+      - name: "💾 Upload AnyKernel3 Image.gz => (${{ env.BUILD_DATE }})"
+        env:
+          ANYKERNEL3_FILE_GZ: "android14-6.1-susfsnext-${{ env.BUILD_DATE }}-gz"
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ANYKERNEL3_FILE_GZ }}
+          path: |
+            ~/kernel/AnyKernel3-gz/*
+   
+      - name: "💾 Upload AnyKernel3 Image.lz4 => (${{ env.BUILD_DATE }})"
+        env:
+          ANYKERNEL3_FILE_LZ4: "android14-6.1-susfsnext-${{ env.BUILD_DATE }}-lz4"
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ANYKERNEL3_FILE_LZ4 }}
+          path: |
+            ~/kernel/AnyKernel3-lz4/*
+            
+      - name: ⏰ Pack output directory
+        continue-on-error: true
+        run: |
+          cd ~/kernel/out
+          mkdir -p output
+
+          # Buscar y copiar los archivos deseados
+          find . -type f \( \
+            -name ".config" -o \
+            -name "*.config" -o \
+            -name "*defconfig" -o \
+            -name "*.tar.gz" -o \
+            -name "*.zip" -o \
+            -name "*.img" -o \
+            -name "*.gz" -o \
+            -name "*.dtb" -o \
+            -name "*.dtbo" -o \
+            -name "*.lz4" -o \
+            -name "*Image" -o \
+            -name "*dtb" -o \
+            -name "*dtbo" -o \
+            -name "*gz" \
+          \) -exec cp --parents {} output/ \;
+
+          # Comprimir los resultados en un .zip
+          cd output
+          
+      - name: ☢️ Upload output directory
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: android14-6.1-output-${{ env.BUILD_DATE }}
+          path: ~/kernel/out/output
+          
+      - name: ⏰ Pack output images directory
+        continue-on-error: true
+        run: |
+          cd ~/kernel/out/pantah/dist
+          mkdir imgs
+          cp *.img imgs
+
+      - name: ☢️ Upload images directory
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: android14-6.1-imgs-${{ env.BUILD_DATE }}
+          path: ~/kernel/out/pantah/dist/imgs
+          
+      - name:  ☢️ Upload output dist directory
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: android14-6.1-dist-${{ env.BUILD_DATE }}
+          path: ~/kernel/out/pantah/dist
+  
+      - name: 🧧 Create GitHub Release => (${{ env.BUILD_DATE }})
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO_OWNER: EduardoA3677
+          REPO_NAME: kernel_buildbot
+          RELEASE_NAME: "Kernels With KernelSU Next & SUSFS v1.5.6"
+          RELEASE_NOTES: |
+            ## Release Notes for v${{ env.BUILD_DATE }}.${{ github.run_number }}
+            ### Features:
+            - [+] KernelSU-Next
+            - [+] SUSFS Support
+            - [+] Magic Mount Support
+        continue-on-error: true
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ env.BUILD_DATE }}.${{ github.run_number }}
+          files: |
+             ${{ env.BUILD_PATH }}/android14-6.1-susfsnext-${{ env.BUILD_DATE }}.zip
+             ${{ env.BUILD_PATH }}/android14-6.1-susfsnext-${{ env.BUILD_DATE }}-gz.zip
+             ${{ env.BUILD_PATH }}/android14-6.1-susfsnext-${{ env.BUILD_DATE }}-lz4.zip
+          generate_release_notes: true
