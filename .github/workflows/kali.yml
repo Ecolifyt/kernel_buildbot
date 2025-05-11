@@ -73,6 +73,16 @@ jobs:
           cd kernel 
           rm -rf aosp
           git clone https://github.com/EduardoA3677/gs201.git -b Kali aosp
+
+      - name: 💫 checkout some google-modules patched
+        run: |
+          cd ~/kernel
+          cd private/google-modules/gxp
+          rm -rf gs201
+          git clone https://github.com/EduardoA3677/gxp-gs201.git --depth=1 gs201
+          cd ~/kernel/private/google-modules/edgetpu
+          rm -rf rio
+          git clone https://github.com/EduardoA3677/rio.git --depth=1 rio
           
       - name: 😎 patch kernel
         run: |
