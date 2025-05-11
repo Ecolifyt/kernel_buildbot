@@ -83,6 +83,9 @@ jobs:
           cd ~/kernel/private/google-modules/edgetpu
           rm -rf rio
           git clone https://github.com/EduardoA3677/rio.git --depth=1 rio
+          cd ~/kernel/private/google-modules/wlan/bcm4389
+          rm -rf bcm4389
+          git clone https://github.com/EduardoA3677/bcm4389 --depth=1 bcm4389
           
       - name: 😎 patch kernel
         run: |
