@@ -99,7 +99,7 @@ jobs:
             tools/bazel build \
               --kernel_package=@//aosp \
               --config=local \
-              --lto=none \
+              --lto=thin \
               --config=pantah \
               //private/devices/google/pantah:gs201_pantah_dist \
               --config=no_download_gki \
