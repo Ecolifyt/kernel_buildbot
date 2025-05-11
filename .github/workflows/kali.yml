@@ -90,12 +90,6 @@ jobs:
           cd kernel/aosp
           cd ~/kernel
           # Add additional tmpfs config setting
-          echo "CONFIG_TMPFS_XATTR=y" >> ./aosp/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_TMPFS_POSIX_ACL=y" >> ./aosp/arch/arm64/configs/gki_defconfig
-          # Add additional config setting
-          echo "CONFIG_IP_NF_TARGET_TTL=y" >> ./aosp/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_IP6_NF_TARGET_HL=y" >> ./aosp/arch/arm64/configs/gki_defconfig
-          echo "CONFIG_IP6_NF_MATCH_HL=y" >> ./aosp/arch/arm64/configs/gki_defconfig
           cd ~/kernel
           sed -i 's/check_defconfig//' ./aosp/build.config.gki
           perl -pi -e 's{UTS_VERSION="\$\(echo \$UTS_VERSION \$CONFIG_FLAGS \$TIMESTAMP \| cut -b -\$UTS_LEN\)"}{UTS_VERSION="#1 SMP PREEMPT Sat Apr 20 04:20:00 UTC 2024"}' ./aosp/scripts/mkcompile_h
