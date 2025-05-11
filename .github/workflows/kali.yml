@@ -92,7 +92,6 @@ jobs:
           # Add additional tmpfs config setting
           cd ~/kernel
           sed -i 's/check_defconfig//' ./aosp/build.config.gki
-          perl -pi -e 's{UTS_VERSION="\$\(echo \$UTS_VERSION \$CONFIG_FLAGS \$TIMESTAMP \| cut -b -\$UTS_LEN\)"}{UTS_VERSION="#1 SMP PREEMPT Sat Apr 20 04:20:00 UTC 2024"}' ./aosp/scripts/mkcompile_h
           sed -i "/stable_scmversion_cmd/s/-maybe-dirty//g" ./build/kernel/kleaf/impl/stamp.bzl
           
       - name: "🐎 Build kernel"
@@ -100,7 +99,7 @@ jobs:
             set -e
             set -x
             cd "$CURRENT_DIR"
-            tools/bazel build \
+            tools/bazel run \
               --kernel_package=@//aosp \
               --config=local \
               --lto=thin \
