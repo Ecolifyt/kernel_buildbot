@@ -72,7 +72,7 @@ jobs:
           cd ~
           cd kernel 
           rm -rf aosp
-          git clone -b Kali https://github.com/EduardoA3677/gs201.git aosp
+          git clone --recursive -b Kali https://github.com/EduardoA3677/gs201.git aosp
 
       - name: 💫 checkout some google-modules patched
         run: |
