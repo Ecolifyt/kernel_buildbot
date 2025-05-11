@@ -86,6 +86,9 @@ jobs:
           cd ~/kernel/private/google-modules/wlan/bcm4389
           rm -rf bcm4389
           git clone https://github.com/EduardoA3677/bcm4389 --depth=1 bcm4389
+          cd ~/kernel/aosp/drivers/staging
+          rm -rf rtl8812au
+          git clone https://github.com/ViP3R-KERNELs/rtl8812au.git --depth=1 rtl8812au
           
       - name: 😎 patch kernel
         run: |
