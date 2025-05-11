@@ -78,7 +78,6 @@ jobs:
         run: |
           cd ~
           cd kernel/aosp
-          rm android/abi_gki_protected_exports_*
           cd ~/kernel
           # Add additional tmpfs config setting
           echo "CONFIG_TMPFS_XATTR=y" >> ./aosp/arch/arm64/configs/gki_defconfig
