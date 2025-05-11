@@ -61,7 +61,7 @@ jobs:
           cd ~        
           mkdir kernel
           cd kernel
-          repo init -u https://android.googlesource.com/kernel/manifest -b android-gs-pantah-6.1-android15-qpr2-beta --depth 1
+          repo init -u https://github.com/EduardoA3677/android-gs-pantah-6.1-android15-qpr2 --depth 1
           repo sync -c -j6 --no-tags --no-clone-bundle --force-sync
           echo "CURRENT_DIR=$(pwd)" >> $GITHUB_ENV
           echo "La ruta actual es: $CURRENT_DIR"
@@ -72,7 +72,7 @@ jobs:
           cd ~
           cd kernel 
           rm -rf aosp
-          git clone https://github.com/EduardoA3677/gs201.git -b Kali aosp
+          git clone -b Kali https://github.com/EduardoA3677/gs201.git aosp
 
       - name: 💫 checkout some google-modules patched
         run: |
