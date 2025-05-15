@@ -154,7 +154,34 @@ jobs:
           name: ${{ env.ANYKERNEL3_FILE_LZ4 }}
           path: |
             ~/kernel/AnyKernel3-lz4/*
-            
+
+      - name: ⏰ Pack output root directory
+        continue-on-error: true
+        run: |
+          cd ~/kernel
+          mkdir -p output
+
+          # Buscar y copiar los archivos deseados
+          find . -type f \( \
+            -name "config" -o \
+            -name ".config" -o \
+            -name "*.config" -o \
+            -name "*config" -o \
+            -name "*defconfig" -o \
+            -name "*olddefconfig" -o \
+            -name "*.configs" \
+          \) -exec cp --parents {} output/ \;
+
+          # Comprimir los resultados en un .zip
+          cd output
+          
+      - name: ☢️ Upload output root directory
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: android14-6.1-output-root-${{ env.BUILD_DATE }}
+          path: ~/kernel/output
+          
       - name: ⏰ Pack output directory
         continue-on-error: true
         run: |
@@ -163,9 +190,12 @@ jobs:
 
           # Buscar y copiar los archivos deseados
           find . -type f \( \
+            -name "config" -o \
             -name ".config" -o \
             -name "*.config" -o \
+            -name "*config" -o \
             -name "*defconfig" -o \
+            -name "*olddefconfig" -o \
             -name "*.tar.gz" -o \
             -name "*.zip" -o \
             -name "*.img" -o \
@@ -197,10 +227,12 @@ jobs:
 
           # Buscar y copiar los archivos deseados
           find . -type f \( \
+            -name "config" -o \
             -name ".config" -o \
             -name "*.config" -o \
+            -name "*config" -o \
             -name "*defconfig" -o \
-            -name "*.olddefconfig" -o \
+            -name "*olddefconfig" -o \
             -name "*.zip" -o \
             -name "*.img" -o \
             -name "*.gz" -o \
