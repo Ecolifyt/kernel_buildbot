@@ -166,12 +166,9 @@ jobs:
 
           # Buscar y copiar los archivos deseados
           find . -type f \( \
-            -name ".config" -o \
-            -name "_config" -o \
             -name "*_config" -o \
             -name "*.config" -o \
             -name "*defconfig" -o \
-            -name "*.tar.gz" -o \   
             -name "*_defconfig" -o \
             -name "gs201_defconfig" -o \
             -name "*Kconfig.ext.gs201" -o \
@@ -180,8 +177,6 @@ jobs:
             -name "*gs201*" -o \
             -name "config" -o \
             -name ".config" -o \
-            -name "*.config" -o \
-            -name "*config" -o \
             -name "*defconfig" -o \
             -name "*olddefconfig" -o \
             -name "*.configs" \
@@ -206,12 +201,10 @@ jobs:
 
           # Buscar y copiar los archivos deseados
           find . -type f \( \
-            -name ".config" -o \
             -name "_config" -o \
             -name "*_config" -o \
             -name "*.config" -o \
             -name "*defconfig" -o \
-            -name "*.tar.gz" -o \   
             -name "*_defconfig" -o \
             -name "gs201_defconfig" -o \
             -name "*Kconfig.ext.gs201" -o \
@@ -220,9 +213,7 @@ jobs:
             -name "*gs201*" -o \
             -name "config" -o \
             -name ".config" -o \
-            -name "*.config" -o \
             -name "*config" -o \
-            -name "*defconfig" -o \
             -name "*olddefconfig" -o \
             -name "*.tar.gz" -o \
             -name "*.zip" -o \
@@ -261,7 +252,6 @@ jobs:
             -name "*_config" -o \
             -name "*.config" -o \
             -name "*defconfig" -o \
-            -name "*.tar.gz" -o \   
             -name "*_defconfig" -o \
             -name "gs201_defconfig" -o \
             -name "*Kconfig.ext.gs201" -o \
@@ -269,10 +259,8 @@ jobs:
             -name "gs201*" -o \
             -name "*gs201*" -o \
             -name "config" -o \
-            -name ".config" -o \
             -name "*.config" -o \
             -name "*config" -o \
-            -name "*defconfig" -o \
             -name "*olddefconfig" -o \
             -name "*.zip" -o \
             -name "*.img" -o \
