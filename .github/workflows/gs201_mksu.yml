@@ -93,7 +93,9 @@ jobs:
               --config=stamp \
               --config=pantah \
               //private/devices/google/pantah:gs201_pantah_dist \
-              --lto=thin \
+              --config=no_download_gki \
+              --config=no_download_gki_fips140 \
+              --lto=full \
               "${@}"
 
       - name: 😋 Pack AnyKernel3
