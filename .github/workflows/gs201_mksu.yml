@@ -85,17 +85,17 @@ jobs:
           rm android/abi_gki_protected_exports_*
           cd ~/kernel
           sed -i 's/check_defconfig//' ./aosp/build.config.gki
+          sed -i 's/-dirty//' ./aosp/scripts/setlocalversion
           
       - name: "🐎 Build kernel"
         run: |
-            set -e
-            set -x
             cd ~/kernel
             tools/bazel run \
               --kernel_package=@//aosp \
               --config=stamp \
               --config=pantah \
               //private/devices/google/pantah:gs201_pantah_dist \
+              --config=use_source_tree_aosp \
               --config=no_download_gki \
               --config=no_download_gki_fips140 \
               --lto=thin \
@@ -166,6 +166,18 @@ jobs:
 
           # Buscar y copiar los archivos deseados
           find . -type f \( \
+            -name ".config" -o \
+            -name "_config" -o \
+            -name "*_config" -o \
+            -name "*.config" -o \
+            -name "*defconfig" -o \
+            -name "*.tar.gz" -o \   
+            -name "*_defconfig" -o \
+            -name "gs201_defconfig" -o \
+            -name "*Kconfig.ext.gs201" -o \
+            -name "*gs201" -o \
+            -name "gs201*" -o \
+            -name "*gs201*" -o \
             -name "config" -o \
             -name ".config" -o \
             -name "*.config" -o \
@@ -194,6 +206,18 @@ jobs:
 
           # Buscar y copiar los archivos deseados
           find . -type f \( \
+            -name ".config" -o \
+            -name "_config" -o \
+            -name "*_config" -o \
+            -name "*.config" -o \
+            -name "*defconfig" -o \
+            -name "*.tar.gz" -o \   
+            -name "*_defconfig" -o \
+            -name "gs201_defconfig" -o \
+            -name "*Kconfig.ext.gs201" -o \
+            -name "*gs201" -o \
+            -name "gs201*" -o \
+            -name "*gs201*" -o \
             -name "config" -o \
             -name ".config" -o \
             -name "*.config" -o \
@@ -232,6 +256,18 @@ jobs:
 
           # Buscar y copiar los archivos deseados
           find . -type f \( \
+            -name ".config" -o \
+            -name "_config" -o \
+            -name "*_config" -o \
+            -name "*.config" -o \
+            -name "*defconfig" -o \
+            -name "*.tar.gz" -o \   
+            -name "*_defconfig" -o \
+            -name "gs201_defconfig" -o \
+            -name "*Kconfig.ext.gs201" -o \
+            -name "*gs201" -o \
+            -name "gs201*" -o \
+            -name "*gs201*" -o \
             -name "config" -o \
             -name ".config" -o \
             -name "*.config" -o \
