@@ -90,7 +90,7 @@ jobs:
       - name: "🐎 Build kernel"
         run: |
             cd ~/kernel
-            tools/bazel run \
+            tools/bazel build \
               --kernel_package=@//aosp \
               --config=stamp \
               --config=pantah \
