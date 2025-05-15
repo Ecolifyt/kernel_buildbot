@@ -80,7 +80,7 @@ jobs:
           cd ~
           cd kernel
           rm -rf aosp
-          git clone -b android14-6.1-2025-05 https://android.googlesource.com/kernel/common aosp
+          git clone -b android14-6.1-2025-05 https://android.googlesource.com/kernel/common.git aosp
           cd aosp
           
       - name: "🐎 Build kernel"
