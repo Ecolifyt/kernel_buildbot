@@ -92,17 +92,17 @@ jobs:
             cd ~/kernel
             tools/bazel run \
               --kernel_package=@//aosp \
-              --config=stamp \
+              --config=local \
               --config=pantah \
               --config=kunit \
               --debug_make_verbosity=D \
               --debug_print_scripts \
               --sandbox_debug \
-              //private/devices/google/pantah:gs201_pantah_dist \
               --config=use_source_tree_aosp \
               --config=no_download_gki \
               --config=no_download_gki_fips140 \
-              --lto=thin \
+              --lto=none \
+              //private/devices/google/pantah:gs201_pantah_dist \
               "${@}"
 
       - name: 😋 Pack AnyKernel3
