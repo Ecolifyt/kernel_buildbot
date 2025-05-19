@@ -92,6 +92,7 @@ jobs:
               --kernel_package=@//aosp \
               --config=stamp \
               --config=pantah \
+              --config=kunit \
               //private/devices/google/pantah:gs201_pantah_dist \
               --config=use_source_tree_aosp \
               --config=no_download_gki \
