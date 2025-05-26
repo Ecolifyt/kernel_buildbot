@@ -68,6 +68,7 @@ jobs:
           git lfs install
           $REPO init -u https://github.com/RisingOS-Revived/android -b qpr2 --git-lfs --depth=1
           git clone --depth=1 https://github.com/Ecolifyt/local_manifests .repo/local_manifests
+          find .repo -name '*.lock' -delete
           $REPO sync -c -j12 --force-sync --no-clone-bundle --no-tags --prune
       # KSU specific steps
       - name: 💫 Build Rom
