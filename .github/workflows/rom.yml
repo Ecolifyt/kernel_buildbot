@@ -45,9 +45,15 @@ jobs:
       - name: 😄 Checkout
         uses: actions/checkout@v4
 
+      - name: Set CONFIG Environment Variable
+        run: |
+          CURRENT_DIR=$(pwd)
+          echo "CURRENT_DIR=$CURRENT_DIR" >> $GITHUB_ENV
+          
       # Install prerequisites for Ubuntu
       - name: ⭐ Install prerequisites
         run: |
+          cd "$CURRENT_DIR"
           sudo apt-get update
           sudo curl --create-dirs -L -o /usr/local/bin/repo -O -L https://storage.googleapis.com/git-repo-downloads/repo
           sudo chmod a+rx /usr/local/bin/repo
@@ -57,27 +63,24 @@ jobs:
           
       - name: 😎 init credentials
         run: |   
-          cd ~      
+          cd "$CURRENT_DIR"
           git config --global user.name "EduardoA3677"
           git config --global user.email "ealvarado261500@gmail.com"
           git lfs install
           
       - name: 🌟 checkout aosp build system
         run: |
-          cd ~        
-          mkdir rom
+          cd "$CURRENT_DIR"
+          mkdir -p rom
           cd rom
           repo init -u https://github.com/RisingOS-Revived/android -b qpr2 --git-lfs
           git clone https://github.com/Ecolifyt/local_manifests .repo/local_manifests
           repo sync -c --no-clone-bundle --optimized-fetch --prune --force-sync -j$(nproc --all)
-          echo "CURRENT_DIR=$(pwd)" >> $GITHUB_ENV
-          echo "La ruta actual es: $CURRENT_DIR"
- 
+          
       # KSU specific steps
       - name: 💫 Build Rom
         run: |
-          cd ~
-          cd rom 
+          cd "$CURRENT_DIR/rom"
           . build/envsetup.sh
           riseup cheetah eng
           rise b
@@ -90,8 +93,8 @@ jobs:
         with:
           name: ${{ env.ANYKERNEL3_FILE }}
           path: |
-            ~/kernel/out/target/product/cheetah/*.zip
-            ~/kernel/out/target/product/cheetah/*.img
+            ${{ env.CURRENT_DIR }}/rom/out/target/product/cheetah/*.zip
+            ${{ env.CURRENT_DIR }}/rom/out/target/product/cheetah/*.img
 
       - name: 🧧 Create GitHub Release => (${{ env.BUILD_DATE }})
         env:
@@ -108,6 +111,6 @@ jobs:
         with:
           tag_name: v${{ env.BUILD_DATE }}.${{ github.run_number }}
           files: |
-             ~/kernel/out/target/product/cheetah/*.zip
-             ~/kernel/out/target/product/cheetah/*.img
+             ${{ env.CURRENT_DIR }}/rom/out/target/product/cheetah/*.zip
+             ${{ env.CURRENT_DIR }}/rom/out/target/product/cheetah/*.img
           generate_release_notes: true
