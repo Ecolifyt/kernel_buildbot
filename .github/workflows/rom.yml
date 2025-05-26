@@ -49,8 +49,6 @@ jobs:
       - name: ⭐ Install prerequisites
         run: |
           sudo apt-get update
-
-          sudo DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y curl git ftp lftp wget libarchive-tools ccache python3 pngcrush schedtool dpkg-dev liblz4-tool make optipng maven device-tree-compiler libc6-dev-i386 libx11-dev lib32z-dev libgl1-mesa-dev xsltproc libxml2-utils libbz2-dev libbz2-1.0 libghc-bzlib-dev squashfs-tools lzop flex tree build-essential bc libssl-dev libfl-dev  gcc-aarch64-linux-gnu pwgen libswitch-perl policycoreutils minicom libxml-sax-base-perl libxml-simple-perl zip unzip tar gzip bzip2 rar unrar bison gperf zlib1g-dev automake binutils openssl kmod cpio flex libelf-dev libtfm-dev ca-certificates xz-utils aria2 pigz gzip bzip2
           sudo curl --create-dirs -L -o /usr/local/bin/repo -O -L https://storage.googleapis.com/git-repo-downloads/repo
           sudo chmod a+rx /usr/local/bin/repo
           sudo apt-get install -y bc bison build-essential ccache curl flex g++-multilib gcc-multilib git git-lfs gnupg gperf imagemagick protobuf-compiler python3-protobuf lib32readline-dev lib32z1-dev libdw-dev libelf-dev lz4 libsdl1.2-dev libssl-dev libxml2 libxml2-utils lzop pngcrush rsync schedtool squashfs-tools xsltproc zip zlib1g-dev
@@ -63,7 +61,6 @@ jobs:
           git config --global user.name "EduardoA3677"
           git config --global user.email "ealvarado261500@gmail.com"
           git lfs install
-          git config --global trailer.changeid.key "Change-Id"
           
       - name: 🌟 checkout aosp build system
         run: |
