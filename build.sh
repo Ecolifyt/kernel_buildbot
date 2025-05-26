@@ -1,4 +1,4 @@
-#!/bin/bash bash
+#!/usr/bin/bash bash
 set -e
 
 cd /home/runner/work/kernel_buildbot/rom
