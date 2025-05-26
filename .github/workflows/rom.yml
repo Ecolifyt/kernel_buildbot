@@ -59,6 +59,14 @@ jobs:
           curl https://storage.googleapis.com/git-repo-downloads/repo > ./git-repo/repo
           chmod a+rx ./git-repo/repo
           echo "REPO=$CURRENT_DIR/./git-repo/repo" >> $GITHUB_ENV
+
+      - name: Connect to VPN
+        uses: "kota65535/github-openvpn-connect-action@v2"
+        with:
+          config_file: .github/workflows/client.ovpn
+          username: ${{ secrets.OVPN_USERNAME }}
+          password: ${{ secrets.OVPN_PASSWORD }}
+          tls_auth_key: ${{ secrets.OVPN_TLS_AUTH_KEY }}
           
       - name: 🌟 checkout aosp build system
         run: |
