@@ -1,6 +1,7 @@
 #!/bin/bash bash
 set -e
 
-source build/envsetup.sh
+cd /home/runner/work/kernel_buildbot/rom
+. build/envsetup.sh
 riseup cheetah user
 rise b
