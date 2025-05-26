@@ -4,8 +4,6 @@ set -e
 cd /home/runner/work/kernel_buildbot
 mkdir -p rom
 cd rom
-git config --global user.name "EduardoA3677"
-git config --global user.email "ealvarado261500@gmail.com"
 git lfs install
 git config --global trailer.changeid.key "Change-Id"
 export USE_CCACHE=1
