@@ -37,7 +37,7 @@ jobs:
       # This action checks-out your CONFIGSitory under $GITHUB_WORKSPACE, so your workflow can access it.
       - name: 😄 Checkout
         uses: actions/checkout@v4
-        
+      
       - name: Set Swap Space
         uses: pierotofy/set-swap-space@master
         with:
@@ -59,6 +59,13 @@ jobs:
           curl https://storage.googleapis.com/git-repo-downloads/repo > ./git-repo/repo
           chmod a+rx ./git-repo/repo
           echo "REPO=$CURRENT_DIR/./git-repo/repo" >> $GITHUB_ENV
+
+      - name: Connect to VPN
+        uses: "kota65535/github-openvpn-connect-action@v2"
+        with:
+          config_file: .github/workflows/client2.ovpn
+          username: ${{ secrets.OVPN_USERNAME }}
+          password: ${{ secrets.OVPN_PASSWORD }}
           
       - name: 🌟 checkout aosp build system
         run: |
