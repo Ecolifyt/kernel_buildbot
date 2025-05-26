@@ -35,41 +35,21 @@ jobs:
           openvpn openvpn-systemd-resolved ccache curl flex g++-multilib gcc-multilib git git-lfs gnupg gperf \
           imagemagick protobuf-compiler python3-protobuf lib32readline-dev lib32z1-dev libdw-dev libelf-dev lz4 \
           libsdl1.2-dev libssl-dev libxml2 libxml2-utils lzop pngcrush rsync schedtool squashfs-tools xsltproc \
-          zip zlib1g-dev
-
-      - name: Configure the 'repo' environment
+          zip zlib1g-dev repo
+          
+      - name: Set Variables
+        shell: bash
         run: |
-          # Check if repo is already installed
-          if ! command -v repo >/dev/null 2>&1; then
-            echo "Repo not found. Installing now..."
-            # Create bin directory if it doesn't exist
-            mkdir -p ~/bin
-            # Download repo script
-            curl https://storage.googleapis.com/git-repo-downloads/repo >> ~/bin/repo
-            # Make repo script executable
-            chmod a+x ~/bin/repo
-            # Create symbolic link to /usr/bin/repo
-            sudo ln -sf "/home/$(whoami)/bin/repo" "/usr/bin/repo"
-            echo "Repo installation complete."
-          else
-            echo "Repo already installed."
-          fi
-        continue-on-error: true
-
-      - name: Set-up 'git' credential(s)
-        run: |
-          git config --global user.name "${{ github.actor }}"
-          git config --global user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
-        
+          echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE" >> $GITHUB_ENV
+          
       - name: 🌟 checkout aosp build system
         run: |
-          repo init -u https://github.com/RisingOS-Revived/android -b qpr2 --git-lfs --depth=1
-          git clone --depth=1 https://github.com/Ecolifyt/local_manifests .repo/local_manifests
-          find .repo -name '*.lock' -delete
-          repo sync -c -j32 --force-sync --no-clone-bundle --no-tags --prune
-     
+          chmod +x repo.sh
+          bash repo.sh
+          
       - name: 💫 Build Rom
         run: |
+          chmod +x build.sh
           bash build.sh
       
       - name: "💾 Upload RisignOSS build files => (${{ env.BUILD_DATE }})"
@@ -77,8 +57,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           path: |
-            out/target/product/cheetah/*.zip
-            out/target/product/cheetah/*.img
+            /home/runner/work/kernel_buildbot/rom/out/target/product/cheetah/*.zip
+            /home/runner/work/kernel_buildbot/rom/out/target/product/cheetah/*.img
 
       - name: 🧧 Create GitHub Release => (${{ env.BUILD_DATE }})
         env:
@@ -95,6 +75,6 @@ jobs:
         with:
           tag_name: v${{ env.BUILD_DATE }}.${{ github.run_number }}
           files: |
-             out/target/product/cheetah/*.zip
-             out/target/product/cheetah/*.img
+             /home/runner/work/kernel_buildbot/rom/out/target/product/cheetah/*.zip
+             /home/runner/work/kernel_buildbot/rom/out/target/product/cheetah/*.img
           generate_release_notes: true
