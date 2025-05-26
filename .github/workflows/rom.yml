@@ -47,7 +47,7 @@ jobs:
       - name: ⭐ Install prerequisites
         run: |
           cd "$CURRENT_DIR"
-          sudo apt-get update
+          sudo apt-get update && sudo apt-get -y upgrade
           DEBIAN_FRONTEND=noninteractive sudo apt install -yq bc bison build-essential ccache curl flex g++-multilib gcc-multilib git git-lfs gnupg gperf imagemagick protobuf-compiler python3-protobuf lib32readline-dev lib32z1-dev libdw-dev libelf-dev lz4 libsdl1.2-dev libssl-dev libxml2 libxml2-utils lzop pngcrush rsync schedtool squashfs-tools xsltproc zip zlib1g-dev
           mkdir -p ./git-repo
           echo "Downloading repo tool..."
@@ -56,7 +56,17 @@ jobs:
           echo "REPO=$CURRENT_DIR/./git-repo/repo" >> $GITHUB_ENV
           wget https://archive.ubuntu.com/ubuntu/pool/universe/n/ncurses/libtinfo5_6.3-2_amd64.deb && sudo dpkg -i libtinfo5_6.3-2_amd64.deb && rm -f libtinfo5_6.3-2_amd64.deb
           wget https://archive.ubuntu.com/ubuntu/pool/universe/n/ncurses/libncurses5_6.3-2_amd64.deb && sudo dpkg -i libncurses5_6.3-2_amd64.deb && rm -f libncurses5_6.3-2_amd64.deb
+          sudo apt install -y openvpn openvpn-systemd-resolved
           
+      - name: Connect to VPN
+        uses: "kota65535/github-openvpn-connect-action@v2"
+        with:
+          config_file: .github/workflows/client.ovpn
+          username: ${{ secrets.OVPN_USERNAME }}
+          password: ${{ secrets.OVPN_PASSWORD }}
+          client_key: ${{ secrets.OVPN_CLIENT_KEY }}
+          tls_auth_key: ${{ secrets.OVPN_TLS_AUTH_KEY }}
+    
       - name: 🌟 checkout aosp build system
         run: |
           cd "$CURRENT_DIR"
