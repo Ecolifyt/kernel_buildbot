@@ -29,7 +29,7 @@ jobs:
       # Install prerequisites for Ubuntu
       - name: ⭐ Install prerequisites
         run: |
-          sudo apt update && sudo apt -y upgeade
+          sudo apt update && sudo apt -y upgrade
           DEBIAN_FRONTEND=noninteractive sudo apt install -y \
           bc bison lib32ncurses5-dev libncurses5 libncurses5-dev build-essential \
           openvpn openvpn-systemd-resolved ccache curl flex g++-multilib gcc-multilib git git-lfs gnupg gperf \
@@ -77,15 +77,15 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           path: |
-            rom/out/target/product/cheetah/*.zip
-            rom/out/target/product/cheetah/*.img
+            out/target/product/cheetah/*.zip
+            out/target/product/cheetah/*.img
 
       - name: 🧧 Create GitHub Release => (${{ env.BUILD_DATE }})
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO_OWNER: Ecolifyt
           REPO_NAME: kernel_buildbot
-          RELEASE_NAME: "RisignOs"
+          RELEASE_NAME: "RisignOSS"
           RELEASE_NOTES: |
             ## Release Notes for v${{ env.BUILD_DATE }}.${{ github.run_number }}
             ### Features:
