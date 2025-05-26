@@ -70,7 +70,7 @@ jobs:
           git lfs install
           $REPO init -u https://github.com/RisingOS-Revived/android -b qpr2 --git-lfs
           git clone https://github.com/Ecolifyt/local_manifests .repo/local_manifests
-          $REPO sync -c --force-sync -j$(nproc --all)
+          $REPO sync -c --optimized-fetch --force-sync -j$(nproc --all)
           
       # KSU specific steps
       - name: 💫 Build Rom
