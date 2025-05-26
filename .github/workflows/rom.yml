@@ -1,4 +1,4 @@
-name: Build kernels Kali
+name: Build RisignOSS
 on:
   workflow_dispatch:
   
@@ -61,7 +61,7 @@ jobs:
           git lfs install
           git config --global trailer.changeid.key "Change-Id"
           
-      - name: 🌟 checkout aosp kernel build system
+      - name: 🌟 checkout aosp build system
         run: |
           cd ~        
           mkdir rom
@@ -81,7 +81,7 @@ jobs:
           riseup cheetah eng
           rise b
       
-      - name: "💾 Upload AnyKernel3 Image => (${{ env.BUILD_DATE }})"
+      - name: "💾 Upload RisignOSS build files => (${{ env.BUILD_DATE }})"
         env:
           ANYKERNEL3_FILE: "android14-6.1-susfsnext-${{ env.BUILD_DATE }}"
         continue-on-error: true
@@ -108,5 +108,5 @@ jobs:
           tag_name: v${{ env.BUILD_DATE }}.${{ github.run_number }}
           files: |
              ~/kernel/out/target/product/cheetah/*.zip
-             ~/kernel/out/target/product/cheetah/*.im
+             ~/kernel/out/target/product/cheetah/*.img
           generate_release_notes: true
