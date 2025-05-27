@@ -117,16 +117,19 @@ jobs:
 
       - name: Source Envsetup
         run: |
+          set -ex
           cd rom
           source build/envsetup.sh || true
 
       - name: Run riseup
         run: |
+          set -ex
           cd rom
           riseup ${{ matrix.device }} user -j${REPO_JOBS}
 
       - name: Run rise
         run: |
+          set -ex
           cd rom
           rise b
 
