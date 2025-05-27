@@ -1,37 +1,53 @@
 name: Build RisignOSS
+
 permissions:
   actions: write
   contents: write
   statuses: write
-  
+
 on:
   workflow_dispatch:
-  
+
 jobs:
   Build-rom:
     name: "🐎 Build Rom"
     runs-on: Fast
-      
+
+    outputs:
+      build_date: ${{ steps.generate-builddate.outputs.build_date }}
+
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ github.workspace }}
+        # Aplica `set -ex` globalmente a todos los comandos shell
+        run: |
+          set -ex
+
     steps:
       - name: Tailscale
         uses: tailscale/github-action@v3
         with:
-           oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
-           oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
-           tags: tag:ci
-           version: latest
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
+          version: latest
 
       - run: curl -vvv https://ifconfig.me
-      
+
       - name: ⏰ Set builddate
         id: generate-builddate
-        run: echo "BUILDDATE=$(date +'%Y%m%d_%H%M%S')" >> $GITHUB_OUTPUT
-        
-      # This action checks-out your CONFIGSitory under $GITHUB_WORKSPACE, so your workflow can access it.
+        run: |
+          BUILD_DATE=$(date +'%Y%m%d_%H%M%S')
+          echo "BUILD_DATE=$BUILD_DATE" >> $GITHUB_ENV
+          echo "build_date=$BUILD_DATE" >> $GITHUB_OUTPUT
+
       - name: 😄 Checkout
         uses: actions/checkout@v4
-          
-      # Install prerequisites for Ubuntu
+
       - name: ⭐ Install prerequisites
         run: |
           sudo apt-get update && sudo apt-get upgrade -y
@@ -43,58 +59,54 @@ jobs:
           zip zlib1g-dev wireguard-tools
 
       - name: Set Variables
-        shell: bash
-        run: |
-          echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE" >> $GITHUB_ENV
+        run: echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE" >> $GITHUB_ENV
 
       - name: Install Git-Repo
         run: |
-          mkdir ~/bin
+          mkdir -p ~/bin
           curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
           chmod a+x ~/bin/repo
           sudo ln -sf ~/bin/repo /usr/bin/repo
-          
-      - run: cd /home/runner/work/kernel_buildbot/kernel_buildbot && mkdir rom && cd rom
 
-      - run: repo init -u https://github.com/RisingOS-Revived/android -b qpr2 --git-lfs
+      - run: mkdir -p rom && cd rom
 
-      - run: git clone https://github.com/Ecolifyt/local_manifests .repo/local_manifests
-      
-      - run: find .repo -name '*.lock' -delete
+      - run: repo init -u https://github.com/RisingOS-Revived/android -b qpr2 --git-lfs --depth=1
 
-      - run: repo sync -j$(nproc --all) --force-sync
+      - run: git clone https://github.com/Ecolifyt/local_manifests rom/.repo/local_manifests
 
-      - run: source build/envsetup.sh
+      - run: |
+          if [ -d "rom/.repo" ]; then
+            find rom/.repo -name '*.lock' -delete
+          fi
 
-      - run: riseup cheetah user
+      - run: cd rom && repo sync -j$(nproc --all) --force-sync -c --no-tags
 
-      - run: rise b
-          
-      - run: ls -R out/
-      
+      - run: cd rom && source build/envsetup.sh
+
+      - run: cd rom && riseup cheetah user
+
+      - run: cd rom && rise b
+
+      - run: ls -R rom/out/
+
       - name: "💾 Upload RisignOSS build files => (${{ env.BUILD_DATE }})"
         continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           path: |
-            /home/runner/work/kernel_buildbot/kernel_buildbot/rom/out/target/product/cheetah/*.zip
-            /home/runner/work/kernel_buildbot/kernel_buildbot/rom/out/target/product/cheetah/*.img
+            rom/out/target/product/cheetah/*.zip
+            rom/out/target/product/cheetah/*.img
 
       - name: 🧧 Create GitHub Release => (${{ env.BUILD_DATE }})
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REPO_OWNER: Ecolifyt
-          REPO_NAME: kernel_buildbot
-          RELEASE_NAME: "RisignOSS"
-          RELEASE_NOTES: |
-            ## Release Notes for v${{ env.BUILD_DATE }}.${{ github.run_number }}
-            ### Features:
-            - [+] First build
         continue-on-error: true
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ env.BUILD_DATE }}.${{ github.run_number }}
+          name: "RisignOSS"
+          body: |
+            ## Release Notes for v${{ env.BUILD_DATE }}.${{ github.run_number }}
+            ### Features:
+            - [+] First build
           files: |
-             /home/runner/work/kernel_buildbot/kernel_buildbot/rom/out/target/product/cheetah/*.zip
-             /home/runner/work/kernel_buildbot/kernel_buildbot/rom/out/target/product/cheetah/*.img
-          generate_release_notes: true
+            rom/out/target/product/cheetah/*.zip
+            rom/out/target/product/cheetah/*.img
