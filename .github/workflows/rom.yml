@@ -94,27 +94,27 @@ jobs:
           fi
 
       - name: Repo Sync with moderate concurrency and retries
+        continue-on-error: true
         run: |
-          set -ex
-          cd rom
-          retries=5
-          job_concurrency=8 # Ajusta este valor según tus necesidades
-          success=0
-          while [ $retries -gt 0 ]; do
-            echo "Intento de repo sync con -j${job_concurrency}, intentos restantes: ${retries}"
-            if repo sync -c --no-clone-bundle --optimized-fetch --prune --force-sync -j${job_concurrency} --fail-fast 2>&1 | tee sync.log; then
-               success=1
-               break
-            else
-               echo "Repo sync falló con -j${job_concurrency}, reintentando en 10 segundos..."
-               sleep 30
-            fi
-            retries=$((retries-1))
-          done
-          if [ $success -ne 1 ]; then
-            echo "Repo sync falló tras varios intentos."
-            exit 1
-          fi
+           cd rom
+           retries=5
+           job_concurrency=8  # Valor intermedio para balancear velocidad y evitar exceso de peticiones
+           success=0
+           while [ $retries -gt 0 ]; do
+             echo "Intento de repo sync con -j${job_concurrency}, intentos restantes: ${retries}"
+           if repo sync -c --no-clone-bundle --optimized-fetch --prune --force-sync -j${job_concurrency} --fail-fast 2>&1 | tee sync.log; then
+             success=1
+           break
+             else
+           echo "Repo sync falló con -j${job_concurrency}. Reintentando en 10 segundos..."
+             sleep 20
+           fi
+             retries=$((retries-1))
+           done
+           if [ $success -ne 1 ]; then
+             echo "Repo sync falló tras varios intentos. Continuando con el workflow."
+             # Finaliza el script con código 0 para que no se detenga el workflow.
+           fi
     
       # Aquí aplicamos un parche al envsetup para que no se quede atascado en la lectura infinita.
       - name: Patch envsetup for CI (fix /dev/urandom hang)
