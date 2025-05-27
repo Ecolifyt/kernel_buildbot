@@ -97,8 +97,8 @@ jobs:
         run: |
           set -ex
           cd rom
-          retries=3
-          job_concurrency=16 # Ajusta este valor según tus necesidades
+          retries=5
+          job_concurrency=8 # Ajusta este valor según tus necesidades
           success=0
           while [ $retries -gt 0 ]; do
             echo "Intento de repo sync con -j${job_concurrency}, intentos restantes: ${retries}"
@@ -107,7 +107,7 @@ jobs:
                break
             else
                echo "Repo sync falló con -j${job_concurrency}, reintentando en 10 segundos..."
-               sleep 10
+               sleep 30
             fi
             retries=$((retries-1))
           done
