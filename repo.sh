@@ -3,12 +3,11 @@ set -e
 
 cd /home/runner/work/kernel_buildbot
 mkdir -p rom
-cd rom
 export USE_CCACHE=1
 export CCACHE_EXEC=/usr/bin/ccache
 ccache -M 50G
+cd rom
 repo init -u https://github.com/RisingOS-Revived/android -b qpr2 --git-lfs
 find .repo -name '*.lock' -delete
-repo sync
-git clone --depth=1 https://github.com/Ecolifyt/local_manifests .repo/local_manifests
+git clone https://github.com/Ecolifyt/local_manifests .repo/local_manifests
 repo sync
