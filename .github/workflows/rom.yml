@@ -100,12 +100,28 @@ jobs:
             find rom/.repo -name '*.lock' -delete
           fi
 
-      - name: Repo Sync
-        continue-on-error: true
+      - name: Repo Sync with moderate concurrency and retries
         run: |
           cd rom
-          repo sync -c --no-clone-bundle --optimized-fetch --prune --force-sync -j${REPO_JOBS} | tee sync.log
-
+          retries=3
+          job_concurrency=8  # Ajusta este valor según tus necesidades
+          success=0
+          while [ $retries -gt 0 ]; do
+            echo "Intento de repo sync con -j${job_concurrency}, intentos restantes: ${retries}"
+            if repo sync -c --no-clone-bundle --optimized-fetch --prune --force-sync -j${job_concurrency} --fail-fast 2>&1 | tee sync.log; then
+               success=1
+               break
+            else
+               echo "Repo sync falló con -j${job_concurrency}, reintentando en 10 segundos..."
+               sleep 10
+            fi
+            retries=$((retries-1))
+          done
+          if [ $success -ne 1 ]; then
+            echo "Repo sync falló tras varios intentos."
+            exit 1
+          fi
+    
       # Aquí aplicamos un parche al envsetup para que no se quede atascado en la lectura infinita.
       - name: Patch envsetup for CI (fix /dev/urandom hang)
         run: |
