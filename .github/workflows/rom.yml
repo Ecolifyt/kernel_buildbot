@@ -13,6 +13,25 @@ jobs:
     runs-on: Ubuntu
       
     steps:
+      - run: sudo apt update && sudo apt install -y wireguard
+
+      - run: echo "${{ secrets.PRIVATE }}" > privatekey
+
+      - run: sudo ip link add dev wg0 type wireguard
+
+      - run: sudo ip address add dev wg0 10.5.0.2/16
+
+      - run: |
+         sudo wg set wg0 \
+           private-key privatekey \
+           peer ${{ secrets.ENDPOINT_PUBLIC_KEY }} \
+           allowed-ips ${{ secrets.ALLOWED_IPS }} \
+           endpoint ${{ secrets.ENDPOINT }} \
+           persistent-keepalive 25
+
+      - run: sudo ip link set up dev wg0
+
+      - run: curl -vvv https://ifconfig.me
       - name: ⏰ Set builddate
         id: generate-builddate
         run: echo "BUILDDATE=$(date +'%Y%m%d_%H%M%S')" >> $GITHUB_OUTPUT
