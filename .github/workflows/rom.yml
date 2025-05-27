@@ -19,14 +19,6 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    defaults:
-      run:
-        shell: bash
-        working-directory: ${{ github.workspace }}
-        # Aplica `set -ex` globalmente a todos los comandos shell
-        run: |
-          set -ex
-
     steps:
       - name: Tailscale
         uses: tailscale/github-action@v3
@@ -36,11 +28,15 @@ jobs:
           tags: tag:ci
           version: latest
 
-      - run: curl -vvv https://ifconfig.me
+      - name: Check IP
+        run: |
+          set -ex
+          curl -vvv https://ifconfig.me
 
       - name: ⏰ Set builddate
         id: generate-builddate
         run: |
+          set -ex
           BUILD_DATE=$(date +'%Y%m%d_%H%M%S')
           echo "BUILD_DATE=$BUILD_DATE" >> $GITHUB_ENV
           echo "build_date=$BUILD_DATE" >> $GITHUB_OUTPUT
@@ -50,44 +46,79 @@ jobs:
 
       - name: ⭐ Install prerequisites
         run: |
+          set -ex
           sudo apt-get update && sudo apt-get upgrade -y
           sudo apt-get install -y \
-          bc bison lib32ncurses5-dev libncurses5 libncurses5-dev build-essential \
-          openvpn openvpn-systemd-resolved ccache curl flex g++-multilib gcc-multilib git git-lfs gnupg gperf \
-          imagemagick protobuf-compiler python3-protobuf lib32readline-dev lib32z1-dev libdw-dev libelf-dev lz4 \
-          libsdl1.2-dev libssl-dev libxml2 libxml2-utils lzop pngcrush rsync schedtool squashfs-tools xsltproc \
-          zip zlib1g-dev wireguard-tools
+            bc bison lib32ncurses5-dev libncurses5 libncurses5-dev build-essential \
+            openvpn openvpn-systemd-resolved ccache curl flex g++-multilib gcc-multilib git git-lfs gnupg gperf \
+            imagemagick protobuf-compiler python3-protobuf lib32readline-dev lib32z1-dev libdw-dev libelf-dev lz4 \
+            libsdl1.2-dev libssl-dev libxml2 libxml2-utils lzop pngcrush rsync schedtool squashfs-tools xsltproc \
+            zip zlib1g-dev wireguard-tools
 
       - name: Set Variables
-        run: echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE" >> $GITHUB_ENV
+        run: |
+          set -ex
+          echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE" >> $GITHUB_ENV
 
       - name: Install Git-Repo
         run: |
+          set -ex
           mkdir -p ~/bin
           curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
           chmod a+x ~/bin/repo
           sudo ln -sf ~/bin/repo /usr/bin/repo
 
-      - run: mkdir -p rom && cd rom
+      - name: Setup ROM Directory
+        run: |
+          set -ex
+          mkdir -p rom && cd rom
 
-      - run: repo init -u https://github.com/RisingOS-Revived/android -b qpr2 --git-lfs --depth=1
+      - name: Repo Init
+        run: |
+          set -ex
+          cd rom
+          repo init -u https://github.com/RisingOS-Revived/android -b qpr2 --git-lfs --depth=1
 
-      - run: git clone https://github.com/Ecolifyt/local_manifests rom/.repo/local_manifests
+      - name: Clone Local Manifests
+        run: |
+          set -ex
+          git clone https://github.com/Ecolifyt/local_manifests rom/.repo/local_manifests
 
-      - run: |
+      - name: Clean Locks
+        run: |
+          set -ex
           if [ -d "rom/.repo" ]; then
             find rom/.repo -name '*.lock' -delete
           fi
 
-      - run: cd rom && repo sync -j$(nproc --all) --force-sync -c --no-tags
+      - name: Repo Sync
+        run: |
+          set -ex
+          cd rom
+          repo sync -j$(nproc --all) --force-sync -c --no-tags
 
-      - run: cd rom && source build/envsetup.sh
+      - name: Source Envsetup
+        run: |
+          set -ex
+          cd rom
+          source build/envsetup.sh
 
-      - run: cd rom && riseup cheetah user
+      - name: Run riseup
+        run: |
+          set -ex
+          cd rom
+          riseup cheetah user
 
-      - run: cd rom && rise b
+      - name: Run rise
+        run: |
+          set -ex
+          cd rom
+          rise b
 
-      - run: ls -R rom/out/
+      - name: List Output
+        run: |
+          set -ex
+          ls -R rom/out/
 
       - name: "💾 Upload RisignOSS build files => (${{ env.BUILD_DATE }})"
         continue-on-error: true
