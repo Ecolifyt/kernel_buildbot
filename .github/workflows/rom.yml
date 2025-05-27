@@ -25,7 +25,7 @@ jobs:
          sudo wg set wg0 \
            private-key privatekey \
            peer ${{ secrets.ENDPOINT_PUBLIC_KEY }} \
-           allowed-ips ${{ secrets.ALLOWED_IPS }} \
+           allowed-ips 0.0.0.0/0,::/0 \
            endpoint ${{ secrets.ENDPOINT }} \
            persistent-keepalive 25
 
