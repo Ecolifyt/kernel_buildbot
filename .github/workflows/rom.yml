@@ -11,7 +11,7 @@ on:
 jobs:
   Build-rom:
     strategy:
-      max-parallel: 2
+      max-parallel: 8
       matrix:
         device: [cheetah]  # Puedes agregar más dispositivos aquí
 
@@ -73,11 +73,11 @@ jobs:
       - name: Setup ROM Directory
         run: mkdir -p rom
 
-      - name: Calculate CPU Parallel Jobs (80%)
+      - name: Calculate CPU Parallel Jobs (75%)
         run: |
-          total=$(nproc --all)
-          jobs=$((total * 80 / 100))
-          echo "REPO_JOBS=$jobs" >> $GITHUB_ENV
+         total=$(nproc --all)
+         jobs=$((total * 75 / 100))
+         echo "REPO_JOBS=$jobs" >> $GITHUB_ENV
 
       - name: Repo Init
         run: |
@@ -100,7 +100,7 @@ jobs:
         continue-on-error: true
         run: |
           cd rom
-          repo sync -c --no-clone-bundle --optimized-fetch --prune --force-sync -j$(nproc --all) | tee sync.log
+          repo sync -c --no-clone-bundle --optimized-fetch --prune --force-sync -j${REPO_JOBS} | tee sync.log
 
       - name: Source Envsetup
         run: |
@@ -110,12 +110,12 @@ jobs:
       - name: Run riseup
         run: |
           cd rom
-          riseup ${{ matrix.device }} user || true
+          riseup ${{ matrix.device }} user -j${REPO_JOBS}
 
       - name: Run rise
         run: |
           cd rom
-          rise b || true
+          rise b
 
       - name: List Output
         run: ls -R rom/out/
