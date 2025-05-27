@@ -56,12 +56,12 @@ jobs:
           
       - name: 🌟 checkout aosp build system
         run: |
-          chmod +x repo.sh
+          chmod a+x repo.sh
           bash repo.sh
           
       - name: 💫 Build Rom
         run: |
-          chmod +x build.sh
+          chmod a+x build.sh
           bash build.sh
       
       - name: "💾 Upload RisignOSS build files => (${{ env.BUILD_DATE }})"
