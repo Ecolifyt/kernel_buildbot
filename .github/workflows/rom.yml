@@ -81,7 +81,9 @@ jobs:
         run: |
           set -ex
           cd rom
-          repo init -u https://github.com/RisingOS-Revived/android -b qpr2 --git-lfs --depth=1
+          git config --global user.name "EduardoB3677"
+          git config --global user.email "ealvarado2677@gmail.com"
+          repo init -u https://github.com/RisingOS-Revived/android -b qpr2 --git-lfs 2>&1 | tee init.log
 
       - name: Clone Local Manifests
         run: |
@@ -99,25 +101,25 @@ jobs:
         run: |
           set -ex
           cd rom
-          repo sync -j${REPO_JOBS} --force-sync -c
+          repo sync -j${REPO_JOBS} --force-sync -c 2>&1 | tee sync.log
 
       - name: Source Envsetup
         run: |
           set -ex
           cd rom
-          source build/envsetup.sh
+          source build/envsetup.sh 2>&1 | tee source.log
 
       - name: Run riseup
         run: |
           set -ex
           cd rom
-          riseup cheetah user
+          riseup cheetah user 2>&1 | tee riseup.log
 
       - name: Run rise
         run: |
           set -ex
           cd rom
-          rise b
+          rise b 2>&1 | tee rise.log
 
       - name: List Output
         run: |
