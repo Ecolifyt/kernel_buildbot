@@ -54,23 +54,31 @@ jobs:
           chmod a+x ~/bin/repo
           sudo ln -sf ~/bin/repo /usr/bin/repo
           
-      - name: 🌟 checkout aosp build system
-        run: |
-          chmod a+x repo.sh
-          bash repo.sh
+      - run: cd /home/runner/work/kernel_buildbot/kernel_buildbot && mkdir rom && cd rom
+
+      - run: repo init -u https://github.com/RisingOS-Revived/android -b qpr2 --git-lfs
+
+      - run: git clone https://github.com/Ecolifyt/local_manifests .repo/local_manifests
+      
+      - run: find .repo -name '*.lock' -delete
+
+      - run: repo sync -j$(nproc --all) --force-sync
+
+      - run: source build/envsetup.sh
+
+      - run: riseup cheetah user
+
+      - run: rise b
           
-      - name: 💫 Build Rom
-        run: |
-          chmod a+x build.sh
-          bash build.sh
+      - run: ls -R out/
       
       - name: "💾 Upload RisignOSS build files => (${{ env.BUILD_DATE }})"
         continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           path: |
-            /home/runner/work/kernel_buildbot/rom/out/target/product/cheetah/*.zip
-            /home/runner/work/kernel_buildbot/rom/out/target/product/cheetah/*.img
+            /home/runner/work/kernel_buildbot/kernel_buildbot/rom/out/target/product/cheetah/*.zip
+            /home/runner/work/kernel_buildbot/kernel_buildbot/rom/out/target/product/cheetah/*.img
 
       - name: 🧧 Create GitHub Release => (${{ env.BUILD_DATE }})
         env:
@@ -87,6 +95,6 @@ jobs:
         with:
           tag_name: v${{ env.BUILD_DATE }}.${{ github.run_number }}
           files: |
-             /home/runner/work/kernel_buildbot/rom/out/target/product/cheetah/*.zip
-             /home/runner/work/kernel_buildbot/rom/out/target/product/cheetah/*.img
+             /home/runner/work/kernel_buildbot/kernel_buildbot/rom/out/target/product/cheetah/*.zip
+             /home/runner/work/kernel_buildbot/kernel_buildbot/rom/out/target/product/cheetah/*.img
           generate_release_notes: true
