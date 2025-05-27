@@ -10,8 +10,13 @@ on:
 
 jobs:
   Build-rom:
-    name: "🐎 Build Rom"
-    runs-on: builde
+    strategy:
+      max-parallel: 2
+      matrix:
+        device: [cheetah]  # Puedes agregar más dispositivos aquí
+
+    name: "🐎 Build Rom - ${{ matrix.device }}"
+    runs-on: [builde]  # Cambia si tu runner tiene otra etiqueta
 
     outputs:
       build_date: ${{ steps.generate-builddate.outputs.build_date }}
@@ -32,66 +37,61 @@ jobs:
           oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
           tags: tag:ci
           version: latest
-          
+
       - name: Check IP
-        run: |
-          set -ex
-          curl -vvv https://ifconfig.me
+        run: curl -vvv https://ifconfig.me
 
       - name: ⏰ Set builddate
         id: generate-builddate
         run: |
-          set -ex
           BUILD_DATE=$(date +'%Y%m%d_%H%M%S')
           echo "BUILD_DATE=$BUILD_DATE" >> $GITHUB_ENV
           echo "build_date=$BUILD_DATE" >> $GITHUB_OUTPUT
 
       - name: ⭐ Install prerequisites
         run: |
-          set -ex
           sudo apt-get update && sudo apt-get upgrade -y
           sudo apt-get install -y \
             bc bison lib32ncurses5-dev libncurses5 libncurses5-dev build-essential \
             openvpn openvpn-systemd-resolved ccache curl flex g++-multilib gcc-multilib git git-lfs gnupg gperf \
             imagemagick protobuf-compiler python3-protobuf lib32readline-dev lib32z1-dev libdw-dev libelf-dev lz4 \
             libsdl1.2-dev libssl-dev libxml2 libxml2-utils lzop pngcrush rsync schedtool squashfs-tools xsltproc \
-            zip zlib1g-dev wireguard-tools
+            zip zlib1g-dev wireguard-tools haveged openssl
 
       - name: Install Git-Repo
         run: |
-          set -ex
-          sudo DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y curl git ftp lftp wget libarchive-tools ccache python3 pngcrush schedtool dpkg-dev liblz4-tool make optipng maven device-tree-compiler libc6-dev-i386 libx11-dev lib32z-dev libgl1-mesa-dev xsltproc libxml2-utils libbz2-dev libbz2-1.0 libghc-bzlib-dev squashfs-tools lzop flex tree build-essential bc libssl-dev libfl-dev  gcc-aarch64-linux-gnu pwgen libswitch-perl policycoreutils minicom libxml-sax-base-perl libxml-simple-perl zip unzip tar gzip bzip2 rar unrar bison gperf zlib1g-dev automake binutils openssl kmod cpio flex libelf-dev libtfm-dev ca-certificates xz-utils aria2 pigz gzip bzip2
-          sudo curl --create-dirs -L -o /usr/local/bin/repo -O -L https://storage.googleapis.com/git-repo-downloads/repo
+          sudo apt-get install --no-install-recommends -y \
+            curl git ftp lftp wget libarchive-tools ccache python3 pngcrush schedtool dpkg-dev liblz4-tool \
+            make optipng maven device-tree-compiler libc6-dev-i386 libx11-dev lib32z-dev libgl1-mesa-dev \
+            xsltproc libxml2-utils libbz2-dev libghc-bzlib-dev squashfs-tools lzop flex tree build-essential \
+            bc libssl-dev libfl-dev gcc-aarch64-linux-gnu pwgen libswitch-perl policycoreutils minicom \
+            libxml-sax-base-perl libxml-simple-perl zip unzip tar gzip bzip2 rar unrar bison gperf \
+            zlib1g-dev automake binutils kmod cpio libelf-dev libtfm-dev ca-certificates xz-utils aria2 pigz
+          sudo curl --create-dirs -L -o /usr/local/bin/repo https://storage.googleapis.com/git-repo-downloads/repo
           sudo chmod a+rx /usr/local/bin/repo
 
       - name: Setup ROM Directory
-        run: |
-          set -ex
-          mkdir -p rom
+        run: mkdir -p rom
 
       - name: Calculate CPU Parallel Jobs (80%)
         run: |
-          set -ex
           total=$(nproc --all)
           jobs=$((total * 80 / 100))
           echo "REPO_JOBS=$jobs" >> $GITHUB_ENV
 
       - name: Repo Init
         run: |
-          set -ex
           cd rom
           git config --global user.name "EduardoB3677"
           git config --global user.email "ealvarado2677@gmail.com"
           repo init -u https://github.com/RisingOS-Revived/android -b qpr2 --git-lfs
-          
+
       - name: Clone Local Manifests
         run: |
-          set -ex
           git clone https://github.com/Ecolifyt/local_manifests rom/.repo/local_manifests
 
       - name: Clean Locks
         run: |
-          set -ex
           if [ -d "rom/.repo" ]; then
             find rom/.repo -name '*.lock' -delete
           fi
@@ -99,40 +99,34 @@ jobs:
       - name: Repo Sync
         continue-on-error: true
         run: |
-          set -ex
           cd rom
-          repo sync -c --no-clone-bundle --optimized-fetch --prune --force-sync -j$(nproc --all) 2>&1 | tee sync.log
-      
+          repo sync -c --no-clone-bundle --optimized-fetch --prune --force-sync -j$(nproc --all) | tee sync.log
+
       - name: Source Envsetup
         run: |
-          set -ex
           cd rom
           source build/envsetup.sh || true
 
       - name: Run riseup
         run: |
-          set -ex
           cd rom
-          riseup cheetah user || true
+          riseup ${{ matrix.device }} user || true
 
       - name: Run rise
         run: |
-          set -ex
           cd rom
           rise b || true
 
       - name: List Output
-        run: |
-          set -ex
-          ls -R rom/out/
+        run: ls -R rom/out/
 
       - name: "💾 Upload RisignOSS build files => (${{ env.BUILD_DATE }})"
         continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           path: |
-            rom/out/target/product/cheetah/*.zip
-            rom/out/target/product/cheetah/*.img
+            rom/out/target/product/${{ matrix.device }}/*.zip
+            rom/out/target/product/${{ matrix.device }}/*.img
             rom/*.log
 
       - name: 🧧 Create GitHub Release => (${{ env.BUILD_DATE }})
@@ -146,6 +140,6 @@ jobs:
             ### Features:
             - [+] First build
           files: |
-            rom/out/target/product/cheetah/*.zip
-            rom/out/target/product/cheetah/*.img
+            rom/out/target/product/${{ matrix.device }}/*.zip
+            rom/out/target/product/${{ matrix.device }}/*.img
             rom/*.log
