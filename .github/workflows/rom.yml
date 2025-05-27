@@ -52,10 +52,9 @@ jobs:
       - name: Install Git-Repo
         run: |
           set -ex
-          mkdir -p ~/bin
-          curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
-          chmod a+x ~/bin/repo
-          sudo ln -sf ~/bin/repo /usr/bin/repo
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y curl git ftp lftp wget libarchive-tools ccache python3 pngcrush schedtool dpkg-dev liblz4-tool make optipng maven device-tree-compiler libc6-dev-i386 libx11-dev lib32z-dev libgl1-mesa-dev xsltproc libxml2-utils libbz2-dev libbz2-1.0 libghc-bzlib-dev squashfs-tools lzop flex tree build-essential bc libssl-dev libfl-dev  gcc-aarch64-linux-gnu pwgen libswitch-perl policycoreutils minicom libxml-sax-base-perl libxml-simple-perl zip unzip tar gzip bzip2 rar unrar bison gperf zlib1g-dev automake binutils openssl kmod cpio flex libelf-dev libtfm-dev ca-certificates xz-utils aria2 pigz gzip bzip2
+          sudo curl --create-dirs -L -o /usr/local/bin/repo -O -L https://storage.googleapis.com/git-repo-downloads/repo
+          sudo chmod a+rx /usr/local/bin/repo
 
       - name: Setup ROM Directory
         run: |
@@ -90,10 +89,12 @@ jobs:
           fi
 
       - name: Repo Sync
+        continue-on-error: true
         run: |
           set -ex
           cd rom
-          repo sync -j${REPO_JOBS} --force-sync -c --no-clone-bundle --no-tags --fail-fast=false 2>&1 | tee sync.log
+          repo sync -c --no-clone-bundle --optimized-fetch --prune --force-sync -j$(nproc --all) 2>&1 | tee sync.log
+      
       - name: Source Envsetup
         run: |
           set -ex
@@ -124,6 +125,7 @@ jobs:
           path: |
             rom/out/target/product/cheetah/*.zip
             rom/out/target/product/cheetah/*.img
+            rom/*.log
 
       - name: 🧧 Create GitHub Release => (${{ env.BUILD_DATE }})
         continue-on-error: true
@@ -138,3 +140,4 @@ jobs:
           files: |
             rom/out/target/product/cheetah/*.zip
             rom/out/target/product/cheetah/*.img
+            rom/*.log
