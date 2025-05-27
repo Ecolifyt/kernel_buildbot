@@ -25,14 +25,6 @@ jobs:
         working-directory: ${{ github.workspace }}
 
     steps:
-      - name: Tailscale
-        uses: tailscale/github-action@v3
-        with:
-          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
-          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
-          tags: tag:ci
-          version: latest
-
       - name: Check IP
         run: |
           set -ex
@@ -83,8 +75,8 @@ jobs:
           cd rom
           git config --global user.name "EduardoB3677"
           git config --global user.email "ealvarado2677@gmail.com"
-          repo init -u https://github.com/RisingOS-Revived/android -b qpr2 --git-lfs 2>&1 | tee init.log
-
+          repo init -u https://github.com/RisingOS-Revived/android -b qpr2 --git-lfs
+          
       - name: Clone Local Manifests
         run: |
           set -ex
@@ -101,8 +93,7 @@ jobs:
         run: |
           set -ex
           cd rom
-          repo sync -j${REPO_JOBS} --force-sync -c 2>&1 | tee sync.log
-
+          repo sync -j${REPO_JOBS} --force-sync -c --no-clone-bundle --no-tags --fail-fast=false 2>&1 | tee sync.log
       - name: Source Envsetup
         run: |
           set -ex
