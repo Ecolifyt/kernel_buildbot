@@ -131,9 +131,9 @@ jobs:
           sed -i 's|cat /dev/urandom|head -c 100 /dev/urandom|g' envsetup.sh
           grep -R "head -c 100 /dev/urandom" envsetup.sh
 
-      - name: Source Envsetup
+      - name: Build RisingOSS
         run: |
-          set -ex
+          set -e
           cd rom
           source build/envsetup.sh || true
           riseup ${{ matrix.device }} user -j${REPO_JOBS}
