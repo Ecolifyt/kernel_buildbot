@@ -1,5 +1,9 @@
 name: Build RisignOSS
 
+concurrency:
+  group: risignoss-${{ github.run_id }}
+  cancel-in-progress: false
+
 permissions:
   actions: write
   contents: write
@@ -11,12 +15,12 @@ on:
 jobs:
   Build-rom:
     strategy:
-      max-parallel: 8
+      max-parallel: 1000
       matrix:
         device: [cheetah]  # Puedes agregar más dispositivos aquí
 
     name: "🐎 Build Rom - ${{ matrix.device }}"
-    runs-on: [builde]  # Cambia si tu runner tiene otra etiqueta
+    runs-on: [builde]
 
     outputs:
       build_date: ${{ steps.generate-builddate.outputs.build_date }}
@@ -75,9 +79,9 @@ jobs:
 
       - name: Calculate CPU Parallel Jobs (75%)
         run: |
-         total=$(nproc --all)
-         jobs=$((total * 75 / 100))
-         echo "REPO_JOBS=$jobs" >> $GITHUB_ENV
+          total=$(nproc --all)
+          jobs=$((total * 75 / 100))
+          echo "REPO_JOBS=$jobs" >> $GITHUB_ENV
 
       - name: Repo Init
         run: |
@@ -101,6 +105,15 @@ jobs:
         run: |
           cd rom
           repo sync -c --no-clone-bundle --optimized-fetch --prune --force-sync -j${REPO_JOBS} | tee sync.log
+
+      # Aquí aplicamos un parche al envsetup para que no se quede atascado en la lectura infinita.
+      - name: Patch envsetup for CI (fix /dev/urandom hang)
+        run: |
+          echo "Aplicando parche a envsetup.sh..."
+          cd rom/vendor/lineage/build
+          # Reemplaza "cat /dev/urandom" por "head -c 100 /dev/urandom" para limitar la cantidad de datos
+          sed -i 's|cat /dev/urandom|head -c 100 /dev/urandom|g' envsetup.sh
+          grep -R "head -c 100 /dev/urandom" envsetup.sh
 
       - name: Source Envsetup
         run: |
