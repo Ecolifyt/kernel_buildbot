@@ -10,7 +10,7 @@ on:
 jobs:
   Build-rom:
     name: "🐎 Build Rom"
-    runs-on: Ubuntu
+    runs-on: Fast
       
     steps:
       - name: Tailscale
