@@ -4,8 +4,6 @@ set -e
 cd /home/runner/work/kernel_buildbot
 mkdir -p rom
 cd rom
-git lfs install
-git config --global trailer.changeid.key "Change-Id"
 export USE_CCACHE=1
 export CCACHE_EXEC=/usr/bin/ccache
 ccache -M 50G
