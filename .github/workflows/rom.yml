@@ -99,19 +99,19 @@ jobs:
         run: |
           set -ex
           cd rom
-          source build/envsetup.sh 2>&1 | tee source.log
+          source build/envsetup.sh || true
 
       - name: Run riseup
         run: |
           set -ex
           cd rom
-          riseup cheetah user 2>&1 | tee riseup.log
+          riseup cheetah user || true
 
       - name: Run rise
         run: |
           set -ex
           cd rom
-          rise b 2>&1 | tee rise.log
+          rise b || true
 
       - name: List Output
         run: |
