@@ -46,9 +46,6 @@ jobs:
           echo "BUILD_DATE=$BUILD_DATE" >> $GITHUB_ENV
           echo "build_date=$BUILD_DATE" >> $GITHUB_OUTPUT
 
-      - name: 😄 Checkout
-        uses: actions/checkout@v4
-
       - name: ⭐ Install prerequisites
         run: |
           set -ex
