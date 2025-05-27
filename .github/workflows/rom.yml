@@ -64,13 +64,6 @@ jobs:
 
       - name: Install Git-Repo
         run: |
-          sudo apt-get install --no-install-recommends -y \
-            curl git ftp lftp wget libarchive-tools ccache python3 pngcrush schedtool dpkg-dev liblz4-tool \
-            make optipng maven device-tree-compiler libc6-dev-i386 libx11-dev lib32z-dev libgl1-mesa-dev \
-            xsltproc libxml2-utils libbz2-dev libghc-bzlib-dev squashfs-tools lzop flex tree build-essential \
-            bc libssl-dev libfl-dev gcc-aarch64-linux-gnu pwgen libswitch-perl policycoreutils minicom \
-            libxml-sax-base-perl libxml-simple-perl zip unzip tar gzip bzip2 rar unrar bison gperf \
-            zlib1g-dev automake binutils kmod cpio libelf-dev libtfm-dev ca-certificates xz-utils aria2 pigz
           sudo curl --create-dirs -L -o /usr/local/bin/repo https://storage.googleapis.com/git-repo-downloads/repo
           sudo chmod a+rx /usr/local/bin/repo
 
@@ -102,9 +95,10 @@ jobs:
 
       - name: Repo Sync with moderate concurrency and retries
         run: |
+          set -ex
           cd rom
           retries=3
-          job_concurrency=8  # Ajusta este valor según tus necesidades
+          job_concurrency=16 # Ajusta este valor según tus necesidades
           success=0
           while [ $retries -gt 0 ]; do
             echo "Intento de repo sync con -j${job_concurrency}, intentos restantes: ${retries}"
