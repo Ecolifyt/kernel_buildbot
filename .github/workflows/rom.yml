@@ -130,7 +130,7 @@ jobs:
           set -e
           cd rom
           source build/envsetup.sh || true
-          riseup ${{ matrix.device }} eng -j${REPO_JOBS}
+          riseup ${{ matrix.device }} user -j${REPO_JOBS}
           rise b
 
       - name: List Output
