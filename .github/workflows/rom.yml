@@ -73,7 +73,7 @@ jobs:
       - name: Calculate CPU Parallel Jobs (75%)
         run: |
           total=$(nproc --all)
-          jobs=$((total * 75 / 100))
+          jobs=$((total * 85 / 100))
           echo "REPO_JOBS=$jobs" >> $GITHUB_ENV
 
       - name: Repo Init
@@ -130,7 +130,7 @@ jobs:
           set -e
           cd rom
           source build/envsetup.sh || true
-          riseup ${{ matrix.device }} user -j${REPO_JOBS}
+          riseup ${{ matrix.device }} eng -j${REPO_JOBS}
           rise b
 
       - name: List Output
