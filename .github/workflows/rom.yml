@@ -1,4 +1,4 @@
-name: Build RisignOSS
+name: Build RisingOSS
 
 concurrency:
   group: risignoss-${{ github.run_id }}
@@ -136,13 +136,19 @@ jobs:
       - name: List Output
         run: ls -R rom/out/
 
-      - name: "💾 Upload RisignOSS build files => (${{ env.BUILD_DATE }})"
+      - name: "💾 Upload RisingOSS build files => (${{ env.BUILD_DATE }})"
         continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           path: |
             rom/out/target/product/${{ matrix.device }}/*.zip
-            rom/out/target/product/${{ matrix.device }}/*.img
+            rom/out/target/product/${{ matrix.device }}/boot.img
+            rom/out/target/product/${{ matrix.device }}/vendor_boot.img
+            rom/out/target/product/${{ matrix.device }}/init_boot.img
+            rom/out/target/product/${{ matrix.device }}/dtbo.img
+            rom/out/target/product/${{ matrix.device }}/vendor_dlkm.img
+            rom/out/target/product/${{ matrix.device }}/system_dlkm.img
+            rom/out/target/product/${{ matrix.device }}/vendor_kernel_boot.img
             rom/*.log
 
       - name: 🧧 Create GitHub Release => (${{ env.BUILD_DATE }})
@@ -150,12 +156,19 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ env.BUILD_DATE }}.${{ github.run_number }}
-          name: "RisignOSS"
+          name: "RisingOSS 7.0"
           body: |
             ## Release Notes for v${{ env.BUILD_DATE }}.${{ github.run_number }}
             ### Features:
             - [+] First build
-          files: |
+            - [+] By EduardoA3677
+          files: | 
             rom/out/target/product/${{ matrix.device }}/*.zip
-            rom/out/target/product/${{ matrix.device }}/*.img
+            rom/out/target/product/${{ matrix.device }}/boot.img
+            rom/out/target/product/${{ matrix.device }}/vendor_boot.img
+            rom/out/target/product/${{ matrix.device }}/init_boot.img
+            rom/out/target/product/${{ matrix.device }}/dtbo.img
+            rom/out/target/product/${{ matrix.device }}/vendor_dlkm.img
+            rom/out/target/product/${{ matrix.device }}/system_dlkm.img
+            rom/out/target/product/${{ matrix.device }}/vendor_kernel_boot.img
             rom/*.log
